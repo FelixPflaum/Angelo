@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Angelo.Settings;
 
 namespace Angelo
 {
@@ -23,16 +24,46 @@ namespace Angelo
         public MainWindow()
         {
             InitializeComponent();
+            LoadSettings();
+        }
+
+        /// <summary>
+        /// Restore saved values for controls.
+        /// </summary>
+        private void LoadSettings()
+        {
+            SensSlider.Value = SettingsManager.settings.Sensitivity;
+            ThresSlider.Value = SettingsManager.settings.Threshold;
+            LureCheckbox.IsChecked = SettingsManager.settings.UseLure;
+
+            if (SettingsManager.WereSettingsLoaded())
+                AddLogLine("Settings restored from file!");
+        }
+
+        /// <summary>
+        /// Add a line to the log box.
+        /// </summary>
+        /// <param name="line">The line to add.</param>
+        public void AddLogLine(string line)
+        {
+            LogBox.AppendText(line + "\n");
+            LogBox.ScrollToEnd();
         }
 
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            if (e.OldValue != 0)
+            {
+                SettingsManager.settings.Sensitivity = (int)SensSlider.Value;
+            }
         }
 
         private void ThresSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            if (e.OldValue != 0)
+            {
+                SettingsManager.settings.Threshold = (int)ThresSlider.Value;
+            }
         }
 
         private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
@@ -57,7 +88,7 @@ namespace Angelo
 
         private void LureCheckbox_Click(object sender, RoutedEventArgs e)
         {
-
+            SettingsManager.settings.UseLure = LureCheckbox.IsChecked == true;
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
