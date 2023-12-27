@@ -24,5 +24,55 @@ namespace Angelo
         {
             InitializeComponent();
         }
+
+        private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
+
+        private void ThresSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
+
+        private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void FishingKeyInput_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void LureKeyInput_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void LureKeyInput_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void LureCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void WAButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
     }
 }

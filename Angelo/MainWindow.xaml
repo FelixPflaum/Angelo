@@ -5,8 +5,55 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Angelo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Angelo" 
+        SizeToContent="WidthAndHeight"
+        MinWidth="350"
+        ResizeMode="NoResize"
+        Topmost="True"
+        Style="{StaticResource DefaultStyle}">
+    <StackPanel Margin="15 10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
-    </Grid>
+            <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource LeftLabel}">Sensitivity</Label>
+            <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Minimum="100" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True" Name="SensSlider" ValueChanged="SensSlider_ValueChanged"></Slider>
+            <Label Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=SensSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
+
+            <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftLabel}">Threshold</Label>
+            <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Minimum="10" Maximum="500" TickFrequency="5" IsSnapToTickEnabled="True" Name="ThresSlider" ValueChanged="ThresSlider_ValueChanged"></Slider>
+            <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=ThresSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
+
+            <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=FishingKeyInput}">Fishing Key</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="FishingKeyInput" KeyDown="FishingKeyInput_KeyDown" KeyUp="FishingKeyInput_KeyUp" IsReadOnly="True"/>
+
+            <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=LureKeyInput}">Lure Key</Label>
+            <StackPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <TextBox VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="LureKeyInput" KeyDown="LureKeyInput_KeyDown" KeyUp="LureKeyInput_KeyUp" IsReadOnly="True"/>
+                <Label VerticalAlignment="Center" Foreground="#FFE6E6E6" Padding="10 0 5 0" Target="{Binding ElementName=LureCheckbox}">Use Lure</Label>
+                <CheckBox Name="LureCheckbox" VerticalAlignment="Center" Click="LureCheckbox_Click"></CheckBox>
+            </StackPanel>
+        </Grid>
+
+        <Button Margin="20" Background="#FF277520" BorderThickness="0" Name="StartButton" Click="StartButton_Click" FontSize="20" Padding="5">Start</Button>
+
+        <TextBox Height="150" Background="#FF464646" BorderBrush="#FF313131" Name="LogBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto"></TextBox>
+
+        <DockPanel Margin="0 10 0 0" TextBlock.FontSize="14">
+            <Label>
+                <Hyperlink Foreground="#FF4A7DB0" NavigateUri="https://github.com/FelixPflaum/Angelo" RequestNavigate="Hyperlink_RequestNavigate">Github</Hyperlink>
+            </Label>
+            <Button Background="#FF434D54" BorderThickness="0" Name="WAButton" Click="WAButton_Click" HorizontalAlignment="Right" Padding="5 0">Copy WA Import-string</Button>
+        </DockPanel>
+    </StackPanel>
 </Window>
