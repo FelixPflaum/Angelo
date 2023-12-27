@@ -47,7 +47,9 @@
 
         <Button Margin="20" Background="#FF277520" BorderThickness="0" Name="StartButton" Click="StartButton_Click" FontSize="20" Padding="5">Start</Button>
 
-        <TextBox Height="150" Background="#FF464646" BorderBrush="#FF313131" Name="LogBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto"></TextBox>
+        <Border BorderBrush="#FF313131" BorderThickness="1">
+            <TextBox Height="150" Background="#FF464646" BorderThickness="0" Name="LogBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto"></TextBox>
+        </Border>
 
         <DockPanel Margin="0 10 0 0" TextBlock.FontSize="14">
             <Label>
