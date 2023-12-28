@@ -12,10 +12,12 @@ namespace Angelo
     public partial class MainWindow : Window
     {
         private readonly KeyBindManager _bindManager;
+        private readonly SettingsData _settings;
 
         public MainWindow()
         {
             _bindManager = KeyBindManager.GetInstance();
+            _settings = SettingsManager.GetSettings();
             InitializeComponent();
             LoadSettings();
         }
@@ -25,9 +27,10 @@ namespace Angelo
         /// </summary>
         private void LoadSettings()
         {
-            SensSlider.Value = SettingsManager.settings.Sensitivity;
-            ThresSlider.Value = SettingsManager.settings.Threshold;
-            LureCheckbox.IsChecked = SettingsManager.settings.UseLure;
+            SensSlider.Value = _settings.Sensitivity;
+            ThresSlider.Value = _settings.Threshold;
+            LureCheckbox.IsChecked = _settings.UseLure;
+
             FishingKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.FISHING);
             LureKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.LURE);
 
@@ -48,13 +51,13 @@ namespace Angelo
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-                SettingsManager.settings.Sensitivity = (int)SensSlider.Value;
+                _settings.Sensitivity = (int)SensSlider.Value;
         }
 
         private void ThresSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-                SettingsManager.settings.Threshold = (int)ThresSlider.Value;
+                _settings.Threshold = (int)ThresSlider.Value;
         }
 
         private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
@@ -76,7 +79,7 @@ namespace Angelo
 
         private void LureCheckbox_Click(object sender, RoutedEventArgs e)
         {
-            SettingsManager.settings.UseLure = LureCheckbox.IsChecked == true;
+            _settings.UseLure = LureCheckbox.IsChecked == true;
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)

@@ -94,7 +94,7 @@ namespace Angelo.Keybinds
 
             string? enumName = Enum.GetName<KeyBindId>(keyBindId);
             if (enumName != null)
-                SettingsManager.settings.KeyBinds[enumName] = bind.PackInt();
+                SettingsManager.GetSettings().KeyBinds[enumName] = bind.PackInt();
 
             return true;
         }
@@ -104,7 +104,7 @@ namespace Angelo.Keybinds
         /// </summary>
         public void LoadSettings()
         {
-            foreach (var entry in SettingsManager.settings.KeyBinds)
+            foreach (var entry in SettingsManager.GetSettings().KeyBinds)
             {
                 KeyBindId id;
                 try
