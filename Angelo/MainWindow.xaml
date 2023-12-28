@@ -35,11 +35,11 @@
             <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=ThresSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
 
             <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=FishingKeyInput}">Fishing Key</Label>
-            <TextBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="FishingKeyInput" KeyDown="FishingKeyInput_KeyDown" KeyUp="FishingKeyInput_KeyUp" IsReadOnly="True"/>
+            <TextBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="FishingKeyInput" KeyDown="FishingKeyInput_KeyDown" KeyUp="KeyInput_KeyUp" IsReadOnly="True"/>
 
             <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=LureKeyInput}">Lure Key</Label>
             <StackPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-                <TextBox VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="LureKeyInput" KeyDown="LureKeyInput_KeyDown" KeyUp="LureKeyInput_KeyUp" IsReadOnly="True"/>
+                <TextBox VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="LureKeyInput" KeyDown="LureKeyInput_KeyDown" KeyUp="KeyInput_KeyUp" IsReadOnly="True"/>
                 <Label VerticalAlignment="Center" Foreground="#FFE6E6E6" Padding="10 0 5 0" Target="{Binding ElementName=LureCheckbox}">Use Lure</Label>
                 <CheckBox Name="LureCheckbox" VerticalAlignment="Center" Click="LureCheckbox_Click"></CheckBox>
             </StackPanel>

@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Angelo.Keybinds;
 using Angelo.Settings;
 
 namespace Angelo
@@ -21,8 +11,11 @@ namespace Angelo
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly KeyBindManager _bindManager;
+
         public MainWindow()
         {
+            _bindManager = KeyBindManager.GetInstance();
             InitializeComponent();
             LoadSettings();
         }
@@ -35,6 +28,8 @@ namespace Angelo
             SensSlider.Value = SettingsManager.settings.Sensitivity;
             ThresSlider.Value = SettingsManager.settings.Threshold;
             LureCheckbox.IsChecked = SettingsManager.settings.UseLure;
+            FishingKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.FISHING);
+            LureKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.LURE);
 
             if (SettingsManager.WereSettingsLoaded())
                 AddLogLine("Settings restored from file!");
@@ -53,37 +48,30 @@ namespace Angelo
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-            {
                 SettingsManager.settings.Sensitivity = (int)SensSlider.Value;
-            }
         }
 
         private void ThresSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-            {
                 SettingsManager.settings.Threshold = (int)ThresSlider.Value;
-            }
         }
 
         private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
-
-        }
-
-        private void FishingKeyInput_KeyUp(object sender, KeyEventArgs e)
-        {
-
+            if (_bindManager.SetKey(KeyBindId.FISHING, e.Key))
+                FishingKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.FISHING);
         }
 
         private void LureKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
-
+            if (_bindManager.SetKey(KeyBindId.LURE, e.Key))
+                LureKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.LURE);
         }
 
-        private void LureKeyInput_KeyUp(object sender, KeyEventArgs e)
+        private void KeyInput_KeyUp(object sender, KeyEventArgs e)
         {
-
+            _bindManager.UpdateModifier(e.Key, false);
         }
 
         private void LureCheckbox_Click(object sender, RoutedEventArgs e)

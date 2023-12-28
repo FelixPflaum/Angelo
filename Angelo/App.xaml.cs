@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Angelo.Keybinds;
 using Angelo.Settings;
 
 namespace Angelo
@@ -17,6 +18,7 @@ namespace Angelo
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             SettingsManager.Load();
+            KeyBindManager.GetInstance().LoadSettings();
             MainWindow main = new();
             main.Show();
         }
