@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Angelo", "Angelo\Angelo.csproj", "{0EB78E6B-BBBD-483A-B3BB-46FDE01A1E70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Angelo", "Angelo\Angelo.csproj", "{0EB78E6B-BBBD-483A-B3BB-46FDE01A1E70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AngeloTest", "AngeloTest\AngeloTest.csproj", "{E6A3FBB5-36B5-4859-AAFB-CA4B45816A7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{0EB78E6B-BBBD-483A-B3BB-46FDE01A1E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EB78E6B-BBBD-483A-B3BB-46FDE01A1E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EB78E6B-BBBD-483A-B3BB-46FDE01A1E70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6A3FBB5-36B5-4859-AAFB-CA4B45816A7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6A3FBB5-36B5-4859-AAFB-CA4B45816A7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6A3FBB5-36B5-4859-AAFB-CA4B45816A7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6A3FBB5-36B5-4859-AAFB-CA4B45816A7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
