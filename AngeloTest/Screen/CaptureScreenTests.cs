@@ -120,5 +120,24 @@ namespace Angelo.Screen.Tests
             Assert.AreNotEqual(p1, p2not1);
             Assert.AreEqual(p1, p2again1);
         }
+
+        [TestMethod()]
+        public void GetBitmapFromBufferTest()
+        {
+            CaptureScreen cap = new();
+            cap.Update();
+            var bmp = cap.GetBitmapFromBuffer(111,222,100,100);
+            PixelColor pctl = cap.GetPixel(111, 222);
+            PixelColor pxbl = cap.GetPixel(210, 321);
+            var bmpFullScale2 = cap.GetBitmapFromBuffer(2);
+
+            Assert.IsTrue(bmp.Width == 100 && bmp.Height == 100);
+            Assert.IsTrue(bmpFullScale2.Width == cap.Screen.Width / 2);
+            Assert.IsTrue(bmpFullScale2.Height == cap.Screen.Height / 2);
+            var tl = bmp.GetPixel(0, 0).ToArgb() & 0xFFFFFF;
+            var bl = bmp.GetPixel(99, 99).ToArgb() & 0xFFFFFF;
+            Assert.IsTrue(pctl.Value == tl, "Color mismatch TL!");
+            Assert.IsTrue(pxbl.Value == bl, "Color mismatch BL!");
+        }
     }
 }

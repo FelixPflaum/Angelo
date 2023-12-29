@@ -67,46 +67,52 @@ namespace Angelo.Screen
         /// <summary>
         /// Get a Bitmap from buffer data. Bitmap will be manually filled, this functions is most likely slow.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
+        /// <param name="xStart"></param>
+        /// <param name="yStart"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
+        /// <param name="pixelRatio">How many pixels to map to one pixel on the created Bitmap.</param>
         /// <returns>Bitmap with the current state from last Update() or UpdatePartial() call.</returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public Bitmap GetBitmapFromBuffer(uint x, uint y, uint width, uint height)
+        public Bitmap GetBitmapFromBuffer(uint xStart, uint yStart, uint width, uint height, uint pixelRatio = 1)
         {
-            if (x + width >= _bmpd.Width)
-                throw new ArgumentOutOfRangeException(nameof(x), "Coordinate can't be outside of screen!");
-            if (y + height >= _bmpd.Height)
-                throw new ArgumentOutOfRangeException(nameof(y), "Coordinate can't be outside of screen!");
+            if (xStart + width > Screen.Width)
+                throw new ArgumentOutOfRangeException(nameof(xStart), "xStart + width can't be > than src width!");
+            if (yStart + height > Screen.Height)
+                throw new ArgumentOutOfRangeException(nameof(xStart), "yStart + height can't be > than src height!");
+            if (pixelRatio != 1 && pixelRatio % 2 != 0)
+                throw new ArgumentOutOfRangeException(nameof(pixelRatio), "Ratio has to be divisible by 2!");
 
             Bitmap recostructed = new((int)width, (int)height, PIXELFORMART);
-            uint xEnd = x + width;
-            uint yEnd = y + height;
+
+            width /= pixelRatio;
+            height /= pixelRatio;
+            uint xEnd = xStart + width;
+            uint yEnd = yStart + height;
 
             unsafe
             {
                 uint* pixelPtr = (uint*)_bmpd.Scan0;
                 uint pixelValue;
 
-                for (; x < xEnd; x++)
+                for (uint x = xStart; x < xEnd; x++)
                 {
-                    for (; y < yEnd; y++)
+                    for (uint y = yStart; y < yEnd; y++)
                     {
-                        pixelPtr = (uint*)_bmpd.Scan0 + (y * _bmpd.Stride / BITS_PER_PIXEL) + x;
+                        pixelPtr = (uint*)_bmpd.Scan0 + (pixelRatio * y * _bmpd.Stride / BITS_PER_PIXEL) + x * pixelRatio;
                         pixelValue = *pixelPtr & 0xFFFFFF;
                         pixelValue |= 0xFF000000;
-                        recostructed.SetPixel((int)x, (int)y, Color.FromArgb((int)pixelValue));
+                        recostructed.SetPixel((int)(x - xStart), (int)(y - yStart), Color.FromArgb((int)pixelValue));
                     }
                 }
             }
+
             return recostructed;
         }
 
-        /// <inheritdoc cref="GetBitmapFromBuffer(uint, uint, uint, uint)"/>
-        public Bitmap GetBitmapFromBuffer()
+        /// <inheritdoc cref="GetBitmapFromBuffer(uint, uint, uint, uint, uint)"/>
+        public Bitmap GetBitmapFromBuffer(uint pixelRatio = 1)
         {
-            return GetBitmapFromBuffer(0, 0, Screen.Width, Screen.Height);
+            return GetBitmapFromBuffer(0, 0, Screen.Width, Screen.Height, pixelRatio);
         }
 
         /// <summary>

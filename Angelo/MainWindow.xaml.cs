@@ -24,6 +24,12 @@ namespace Angelo
             LoadSettings();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            DebugWindow.GetInstance().Close();
+        }
+
         /// <summary>
         /// Restore saved values for controls.
         /// </summary>
@@ -107,6 +113,13 @@ namespace Angelo
                 if (ex.StackTrace != null)
                     AddLogLine(ex.StackTrace);
             }
+        }
+
+        private void DBGButton_Click(object sender, RoutedEventArgs e)
+        {
+            DebugWindow debgWindow = DebugWindow.GetInstance();
+            debgWindow.Show();
+            debgWindow.Focus();
         }
     }
 }

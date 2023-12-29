@@ -55,7 +55,8 @@
             <Label>
                 <Hyperlink Foreground="#FF4A7DB0" NavigateUri="https://github.com/FelixPflaum/Angelo" RequestNavigate="Hyperlink_RequestNavigate">Github</Hyperlink>
             </Label>
-            <Button Background="#FF434D54" BorderThickness="0" Name="WAButton" Click="WAButton_Click" HorizontalAlignment="Right" Padding="5 0">Copy WA Import-string</Button>
+            <Button DockPanel.Dock="Right" Background="#00333D54" BorderThickness="1" Name="WAButton" Click="WAButton_Click" HorizontalAlignment="Right" Padding="5 0">Copy WA Import-string</Button>
+            <Button DockPanel.Dock="Right" Background="#00333D54" BorderThickness="1" Name="DBGButton" Click="DBGButton_Click" HorizontalAlignment="Right" Margin="0 0 5 0" Padding="5 0">Open Stats</Button>
         </DockPanel>
     </StackPanel>
 </Window>

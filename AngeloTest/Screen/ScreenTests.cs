@@ -1,6 +1,6 @@
 ﻿using Angelo.Screen;
 
-namespace AngeloTest
+namespace AngeloTest.Screen
 {
     [TestClass]
     public class ScreenTests
