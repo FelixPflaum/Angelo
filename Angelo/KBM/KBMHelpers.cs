@@ -101,6 +101,44 @@ namespace Angelo.KBM
         }
 
         /// <summary>
+        /// Send mouse click down and up events.
+        /// </summary>
+        /// <param name="rightClick">Right click if true, otherwise left click.</param>
+        /// <param name="releaseDelayMs">If not 0 then sleep the thread for this long between events.</param>
+        /// <returns>True if both events were successful.</returns>
+        public static bool MouseClick(bool rightClick, int releaseDelayMs = 0)
+        {
+            Input[] inputs = new Input[1]
+            {
+                new Input()
+                {
+                    type = (uint)InputType.Mouse,
+                    union = new InputUnion()
+                    {
+                        mi = new MouseInput
+                        {
+                            dwFlags = (uint)(rightClick ? DWMouseFlags.RightDown : DWMouseFlags.LeftDown),
+                            dwExtraInfo = GetMessageExtraInfo()
+                        }
+                    }
+                },
+            };
+            uint resDown = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
+
+            // Failed to send any key down events, don't bother with keyup events.
+            if (resDown == 0)
+                return false;
+
+            if (releaseDelayMs > 0)
+                Thread.Sleep(releaseDelayMs);
+
+            inputs[0].union.mi.dwFlags = (uint)(rightClick ? DWMouseFlags.RightUp : DWMouseFlags.LeftUp);
+            uint res = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
+
+            return res != 0;
+        }
+
+        /// <summary>
         /// Move mouse using relative movement. 
         /// Sets position with absolute values due to relative 
         /// movement being affected by mouse acceleration and speed.
