@@ -3,129 +3,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using Angelo.Screen;
+using static Angelo.WinAPI.User32;
+using static Angelo.WinAPI.User32Defs;
 
 namespace Angelo.KBM
 {
     internal static class KBMHelpers
     {
-        private enum InputType
-        {
-            Mouse = 0,
-            Keyboard = 1,
-            Hardware = 2
-        }
-
-        [Flags]
-        private enum DWKeyboardFlags
-        {
-            KeyDown = 0x0,
-            /// <summary>
-            /// If specified, the wScan scan code consists of a sequence of two bytes, 
-            /// where the first byte has a value of 0xE0. See Extended-Key Flag for more info. 
-            /// </summary>
-            ExtendedKey = 0x1,
-            KeyUp = 0x2,
-            /// <summary>
-            /// If specified, the system synthesizes a VK_PACKET keystroke. The wVk parameter must be zero. 
-            /// This flag can only be combined with the KEYEVENTF_KEYUP flag. For more information, see the Remarks section. 
-            /// </summary>
-            Unicode = 0x4,
-            /// <summary>
-            /// If specified, wScan identifies the key and wVk is ignored. 
-            /// </summary>
-            Scancode = 0x8,
-        }
-
-        [Flags]
-        private enum DWMouseFlags
-        {
-            /// <summary>
-            /// Relative mouse movement! This is subject to mouse settings and my not be in pixels!
-            /// </summary>
-            Move = 0x1,
-            LeftDown = 0x2,
-            LeftUp = 0x4,
-            RightDown = 0x8,
-            RightUp = 0x10,
-            MiddleDown = 0x20,
-            MiddleUp = 0x40,
-            /// <summary>
-            /// Maps coordinates to the entire desktop. Must be used with MOUSEEVENTF_ABSOLUTE.
-            /// </summary>
-            VirtualDesk = 0x4000,
-            /// <summary>
-            /// The dx and dy members contain normalized absolute coordinates. 
-            /// If the flag is not set, dxand dy contain relative data (the change in position since the last reported position). 
-            /// This flag can be set, or not set, regardless of what kind of mouse or other pointing device, if any, 
-            /// is connected to the system. For further information about relative mouse motion, see the following Remarks section.
-            /// </summary>
-            Absolute = 0x8000,
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MouseInput
-        {
-            public int dx;
-            public int dy;
-            public uint mouseData;
-            public uint dwFlags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct KeyboardInput
-        {
-            public ushort wVk;
-            public ushort wScan;
-            public uint dwFlags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct HardwareInput
-        {
-            public uint uMsg;
-            public ushort wParamL;
-            public ushort wParamH;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct InputUnion
-        {
-            [FieldOffset(0)] public MouseInput mi;
-            [FieldOffset(0)] public KeyboardInput ki;
-            [FieldOffset(0)] public HardwareInput hi;
-        }
-
-        private struct Input
-        {
-            public uint type;
-            public InputUnion union;
-        }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetMessageExtraInfo();
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Point
-        {
-            public int X;
-            public int Y;
-        }
-
-        /// <summary>
-        /// Retrieve current cursor position.
-        /// </summary>
-        /// <param name="point">Will contain the position relative to top left corner of primary screen.</param>
-        /// <returns>True if successful.</returns>
-        [DllImport("user32.dll")]
-        public static extern bool GetCursorPos(out Point point);
-
         /// <summary>
         /// Send keyboard input to currently active window.
         /// Will first send key down events for all given virtual keys, then key up events.
