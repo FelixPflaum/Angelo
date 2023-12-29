@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using Angelo.Keybinds;
@@ -89,12 +91,22 @@ namespace Angelo
 
         private void WAButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Clipboard.SetText(Properties.Resources.WA);
+            AddLogLine("WeakAura import string copied to clipboard.");
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-
+            try
+            {
+                Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Couldn't open URL!", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ex.StackTrace != null)
+                    AddLogLine(ex.StackTrace);
+            }
         }
     }
 }
