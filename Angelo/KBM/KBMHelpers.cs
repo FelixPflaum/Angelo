@@ -187,7 +187,7 @@ namespace Angelo.KBM
         /// <returns>True if input was sent successfully.</returns>
         public static bool MoveMouseAbsolute(int x, int y)
         {
-            var bounds = ScreenReader.GetPrimaryScreenRes();
+            var bounds = ScreenHelpers.GetScreenData();
             const int normalizedMax = 0xFFFF;
             double normDX = (double)x * normalizedMax / (bounds.Width - 1);
             double normDY = (double)y * normalizedMax / (bounds.Height - 1);

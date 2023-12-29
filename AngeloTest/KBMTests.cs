@@ -9,7 +9,7 @@ namespace AngeloTest
         [TestMethod]
         public void TestMouseMovementAbsolute()
         {
-            var bounds = ScreenReader.GetPrimaryScreenRes();
+            var bounds = ScreenHelpers.GetPrimaryScreenRes();
             Random rnd = new();
 
             for(int i = 0; i < 200; i++)
@@ -27,7 +27,7 @@ namespace AngeloTest
         [TestMethod]
         public void TestMouseMovementRelative()
         {
-            var bounds = ScreenReader.GetPrimaryScreenRes();
+            var bounds = ScreenHelpers.GetPrimaryScreenRes();
             Random rnd = new();
 
             for (int mi = 0; mi < 10; mi++)
