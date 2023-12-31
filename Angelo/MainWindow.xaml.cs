@@ -15,6 +15,7 @@ namespace Angelo
     {
         private readonly KeyBindManager _bindManager;
         private readonly SettingsData _settings;
+        private readonly Harbormaster _harbormaster;
 
         public MainWindow()
         {
@@ -22,11 +23,13 @@ namespace Angelo
             _settings = SettingsManager.GetSettings();
             InitializeComponent();
             LoadSettings();
+            _harbormaster = new Harbormaster(this, new UI.StartButton(StartButton));
         }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
+            _harbormaster.StopFishing();
             DebugWindow.GetInstance().Close();
         }
 
@@ -92,7 +95,10 @@ namespace Angelo
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-
+            if (_harbormaster.IsFishing())
+                _harbormaster.StopFishing();
+            else
+                _harbormaster.StartFishing();
         }
 
         private void WAButton_Click(object sender, RoutedEventArgs e)

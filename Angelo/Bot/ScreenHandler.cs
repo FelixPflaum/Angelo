@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using Angelo.Screen;
 
-namespace Angelo.Screen
+namespace Angelo.Bot
 {
     internal class ScreenHandler
     {
@@ -154,7 +155,7 @@ namespace Angelo.Screen
 
             while (y < endY)
             {
-                PixelColor pixel = _capture.GetPixel((uint)x, (uint)y);
+                PixelColor pixel = _capture.GetPixel(x, y);
 
                 if (pixel.R >= threshold && pixel.G >= threshold && pixel.B >= threshold)
                     count++;

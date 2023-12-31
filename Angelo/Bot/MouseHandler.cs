@@ -3,12 +3,12 @@ using static Angelo.WinAPI.User32;
 using static Angelo.WinAPI.User32Defs;
 using static Angelo.KBM.KBMHelpers;
 
-namespace Angelo.KBM
+namespace Angelo.Bot
 {
     internal class MouseHandler
     {
         private const int USAGE_LINGER_TIME = 3000;
-        
+
         private Point _lastPos;
         private long _unchangedSince;
 
@@ -46,9 +46,9 @@ namespace Angelo.KBM
         }
 
         /// <summary>
-        /// Just a convinience alias for <see cref="KBMHelpers.MouseClick(bool, int)"/>.
+        /// Just a convinience alias for <see cref="MouseClick(bool, int)"/>.
         /// </summary>
-        /// <inheritdoc cref="KBMHelpers.MouseClick(bool, int)"/>
+        /// <inheritdoc cref="MouseClick(bool, int)"/>
         public static void Click(bool isRightClick, int releaseDelayMs)
         {
             MouseClick(isRightClick, releaseDelayMs);
