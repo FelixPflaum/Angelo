@@ -1,5 +1,4 @@
-﻿using Angelo.Keybinds;
-using Angelo.Settings;
+﻿using Angelo.Settings;
 using System;
 using System.Threading;
 
@@ -12,7 +11,7 @@ namespace Angelo.Bot
     {
         private readonly MouseHandler _mouse;
         private readonly ScreenHandler _screen;
-        private readonly KeyBindManager _keybindManager;
+        private readonly KeyboardHandler _keyboard;
         private readonly SettingsData _settings;
 
         private LogCallback _logCallback;
@@ -28,7 +27,7 @@ namespace Angelo.Bot
 
             _mouse = new MouseHandler();
             _screen = new ScreenHandler();
-            _keybindManager = KeyBindManager.GetInstance();
+            _keyboard = new KeyboardHandler();
             _settings = SettingsManager.GetSettings();
             _shouldStop = false;
         }
