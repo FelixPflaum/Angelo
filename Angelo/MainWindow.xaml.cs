@@ -19,7 +19,7 @@ namespace Angelo
 
         public MainWindow()
         {
-            _bindManager = KeyBindManager.GetInstance();
+            _bindManager = new KeyBindManager();
             _settings = SettingsManager.GetSettings();
             InitializeComponent();
             LoadSettings();
@@ -41,9 +41,8 @@ namespace Angelo
             SensSlider.Value = _settings.Sensitivity;
             ThresSlider.Value = _settings.Threshold;
             LureCheckbox.IsChecked = _settings.UseLure;
-
-            FishingKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.FISHING);
-            LureKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.LURE);
+            FishingKeyInput.Text = _settings.FishingKey.ToString();
+            LureKeyInput.Text = _settings.LureKey.ToString();
 
             if (SettingsManager.WereSettingsLoaded())
                 AddLogLine("Settings restored from file!");
@@ -74,13 +73,13 @@ namespace Angelo
         private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (_bindManager.SetKey(KeyBindId.FISHING, e.Key))
-                FishingKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.FISHING);
+                FishingKeyInput.Text = _settings.FishingKey.ToString();
         }
 
         private void LureKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (_bindManager.SetKey(KeyBindId.LURE, e.Key))
-                LureKeyInput.Text = _bindManager.GetKeyBindString(KeyBindId.LURE);
+                LureKeyInput.Text = _settings.LureKey.ToString();
         }
 
         private void KeyInput_KeyUp(object sender, KeyEventArgs e)

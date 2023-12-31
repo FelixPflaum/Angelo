@@ -1,43 +1,19 @@
 ﻿using Angelo.KBM;
 using Angelo.Settings;
 using System;
-using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Angelo.Keybinds
 {
     internal class KeyBindManager
     {
-        private static readonly KeyBindManager _instance = new();
-        private readonly Dictionary<KeyBindId, KeyBind> _keyBinds;
+        private readonly SettingsData _settingsData;
         private KeyboardModifiers _modifiers;
 
-        private KeyBindManager()
+        public KeyBindManager()
         {
-            _keyBinds = new();
             _modifiers = KeyboardModifiers.NONE;
-        }
-
-        public static KeyBindManager GetInstance()
-        {
-            return _instance;
-        }
-
-        /// <summary>
-        /// Get a KeyBind.
-        /// </summary>
-        /// <param name="keyBindId"></param>
-        /// <returns>The KeyBind</returns>
-        private KeyBind GetBind(KeyBindId keyBindId)
-        {
-            _keyBinds.TryGetValue(keyBindId, out KeyBind? bind);
-            if (bind == null)
-            {
-                bind = new();
-                _keyBinds.Add(keyBindId, bind);
-            }
-            return bind;
+            _settingsData = SettingsManager.GetSettings();
         }
 
         /// <summary>
@@ -76,6 +52,30 @@ namespace Angelo.Keybinds
             return false;
         }
 
+        private KeyBind GetKeyBind(KeyBindId keyBindId)
+        {
+            return keyBindId switch
+            {
+                KeyBindId.FISHING => _settingsData.FishingKey,
+                KeyBindId.LURE => _settingsData.LureKey,
+                _ => throw new ArgumentException("Invalid KeyBindId"),
+            };
+        }
+
+        private void SetKeyBind(KeyBindId keyBindId, KeyBind keyBind)
+        {
+            switch (keyBindId)
+            {
+                case KeyBindId.FISHING:
+                    _settingsData.FishingKey = keyBind;
+                    break;
+                case KeyBindId.LURE:
+                    _settingsData.LureKey = keyBind;
+                    break;
+                default: throw new ArgumentException("Invalid KeyBindId"),
+            }
+        }
+
         /// <summary>
         /// Set key or modifier. If key is not a modifier then key bind will be updated.
         /// </summary>
@@ -87,58 +87,23 @@ namespace Angelo.Keybinds
             if (UpdateModifier(key, true))
                 return false;
 
-            KeyBind bind = GetBind(keyBindId);
+            KeyBind oldBind = GetKeyBind(keyBindId);
+            KeyBind newBind;
 
-            if (!bind.SetKeybind(key, _modifiers))
+            try
+            {
+                newBind = KeyBind.FromKey(key, _modifiers);
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (oldBind.IsEqualTo(newBind))
                 return false;
 
-            string? enumName = Enum.GetName<KeyBindId>(keyBindId);
-            if (enumName != null)
-                SettingsManager.GetSettings().KeyBinds[enumName] = bind.PackInt();
-
+            SetKeyBind(keyBindId, newBind);
             return true;
-        }
-
-        /// <summary>
-        /// Restore key bindings from settings.
-        /// </summary>
-        public void LoadSettings()
-        {
-            foreach (var entry in SettingsManager.GetSettings().KeyBinds)
-            {
-                KeyBindId id;
-                try
-                {
-                    id = Enum.Parse<KeyBindId>(entry.Key);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, String.Format("Couldn't load bind with key {0}!", entry.Key), MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                var bind = GetBind(id);
-                bind.SetFromPackedInt(entry.Value);
-            }
-        }
-
-        /// <summary>
-        /// Get a string representation of a key bind.
-        /// </summary>
-        /// <param name="keyBindId"></param>
-        /// <returns>The string describing the key bind.</returns>
-        public string GetKeyBindString(KeyBindId keyBindId)
-        {
-            return GetBind(keyBindId).GetKeyBindString();
-        }
-
-        /// <summary>
-        /// Get array of virtual key codes for keyboard functions.
-        /// </summary>
-        /// <param name="keyBindId"></param>
-        /// <returns>Array of virtual key codes in the order they should be used. Array may be empty if no key bind is set.</returns>
-        public byte[] GetVKeyArray(KeyBindId keyBindId)
-        {
-            return GetBind(keyBindId).GetVKeyArray();
         }
     }
 }

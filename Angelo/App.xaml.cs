@@ -12,7 +12,6 @@ namespace Angelo
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             SettingsManager.Load();
-            KeyBindManager.GetInstance().LoadSettings();
             MainWindow main = new();
             main.Show();
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Angelo.Keybinds;
+using System.Text.Json.Serialization;
 
 namespace Angelo.Settings
 {
@@ -7,7 +8,12 @@ namespace Angelo.Settings
         public int Sensitivity { get; set; } = 100;
         public int Threshold { get; set; } = 10;
         public bool UseLure { get; set; } = false;
-        public Dictionary<string, uint> KeyBinds { get; set; } = new();
+
+        [JsonConverter(typeof(KeyBindJsonConverter))]
+        public KeyBind FishingKey { get; set; } = new();
+
+        [JsonConverter(typeof(KeyBindJsonConverter))]
+        public KeyBind LureKey { get; set; } = new();
 
         public SettingsData() { }
 
@@ -16,7 +22,8 @@ namespace Angelo.Settings
             Sensitivity = data.Sensitivity;
             Threshold = data.Threshold;
             UseLure = data.UseLure;
-            KeyBinds = data.KeyBinds;
+            FishingKey = data.FishingKey;
+            LureKey = data.LureKey;
         }
     }
 }

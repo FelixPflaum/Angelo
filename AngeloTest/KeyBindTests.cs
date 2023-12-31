@@ -54,19 +54,16 @@ namespace AngeloTest
 
             foreach (var test in tests)
             {
-                var kb = new KeyBind();
-                kb.SetKeybind(test.key, test.modifiers);
+                var kb = KeyBind.FromKey(test.key, test.modifiers);
+                
+                Assert.AreEqual(test.expectedVirtualKey, kb.VirtualKey, "Virtual key doesn't match expected value!");
+                Assert.AreEqual(test.expectedString, kb.ToString(), "String output doesn't match expected value!");
+                Assert.AreEqual(test.modifiers, kb.Modifiers, "Modifiers don't match anymore!");
 
-                var packed = kb.PackInt();
-                kb.SetFromPackedInt(packed);
+                var kbfp = KeyBind.FromPackedInt(kb.PackInt());
 
-                var vk = kb.GetKey();
-                var mod = kb.GetMods();
-                var str = kb.GetKeyBindString();
-
-                Assert.AreEqual(test.expectedVirtualKey, vk, "Virtual key doesn't match expected value!");
-                Assert.AreEqual(test.expectedString, str, "String output doesn't match expected value!");
-                Assert.AreEqual(test.modifiers, mod, "Modifiers don't match anymore!");
+                Assert.AreEqual(kbfp.VirtualKey, kb.VirtualKey, "Virtual key doesn't match anymore after pack!");
+                Assert.AreEqual(kbfp.Modifiers, kb.Modifiers, "Modifiers don't match anymore after pack!");
             }
         }
     }

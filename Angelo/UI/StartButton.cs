@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media;
 using System.Windows.Controls;
-using System.Runtime.InteropServices;
+using static Angelo.UI.UIHelpers;
 
 namespace Angelo.UI
 {
@@ -20,16 +20,6 @@ namespace Angelo.UI
             _defaultBrush = (SolidColorBrush)button.Background;
             _redBrush = new SolidColorBrush(GetHueShiftedColor(_defaultBrush.Color, 5.0f));
         }
-
-        /// <summary>
-        /// Converts colors from hue-luminance-saturation (HLS) to RGB format.
-        /// </summary>
-        /// <param name="H">The original HLS hue value. Can range from 0 to 240.</param>
-        /// <param name="L">The original HLS luminance value. Can range from 0 to 240.</param>
-        /// <param name="S">The original HLS saturation value. Can range from 0 to 240.</param>
-        /// <returns>Returns the RGB value. Byteorder is BGR!</returns>
-        [DllImport("shlwapi.dll")]
-        public static extern int ColorHLSToRGB(ushort H, ushort L, ushort S);
 
         /// <summary>
         /// Shift a color to a set hue.

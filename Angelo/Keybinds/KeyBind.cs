@@ -5,54 +5,43 @@ using Angelo.KBM;
 
 namespace Angelo.Keybinds
 {
-    internal class KeyBind
+    internal readonly struct KeyBind
     {
-        private byte _virtualKey;
-        private KeyboardModifiers _modifiers;
+        public readonly byte VirtualKey;
+        public readonly KeyboardModifiers Modifiers;
 
-        public KeyBind()
+        public KeyBind(byte virtualKey, KeyboardModifiers modifiers)
         {
-            SetKeybind(Key.None, 0);
+            VirtualKey = virtualKey;
+            Modifiers = modifiers;
         }
 
         /// <summary>
-        /// Set key bind.
+        /// Get key bind from Key.
         /// </summary>
-        /// <param name="key">WPF key code.</param>
+        /// <param name="key">WPF key.</param>
         /// <param name="modifiers">Modifier mask.</param>
-        /// <returns>True if key was valid.</returns>
-        public bool SetKeybind(Key key, KeyboardModifiers modifiers)
+        /// <returns>A new KeyBind.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">If Key does not translate to a vkey 1-255.</exception>
+        public static KeyBind FromKey(Key key, KeyboardModifiers modifiers)
         {
             int vk = KeyInterop.VirtualKeyFromKey(key);
-            if (vk <= 0xFF)
-            {
-                _virtualKey = (byte)KeyInterop.VirtualKeyFromKey(key);
-                _modifiers = modifiers;
 
-                if (_virtualKey == 0)
-                    _modifiers = 0;
+            if (vk > 0xFF)
+                throw new ArgumentOutOfRangeException(nameof(key), "Key results in invalid virtual key code!");
 
-                return true;
-            }
-            return false;
+            return new KeyBind((byte)vk, modifiers);
         }
 
         /// <summary>
-        /// Get the virtual key code.
+        /// Set key bind from packed uint.
         /// </summary>
-        /// <returns>The virtual key code.</returns>
-        public byte GetKey()
+        /// <param name="packed">A uint value previously packed with PackInt()</param>
+        /// <exception cref="ArgumentOutOfRangeException">If packed vkey is not 1-255.</exception>
+        public static KeyBind FromPackedInt(uint packed)
         {
-            return _virtualKey;
-        }
-
-        /// <summary>
-        /// Get the modifier mask.
-        /// </summary>
-        /// <returns>The modifier mask.</returns>
-        public KeyboardModifiers GetMods()
-        {
-            return _modifiers;
+            KeyboardModifiers mods = (KeyboardModifiers)(packed & 0xFFFF0000);
+            return new KeyBind((byte)(packed & 0xFF), mods);
         }
 
         /// <summary>
@@ -61,17 +50,7 @@ namespace Angelo.Keybinds
         /// <returns>The uint containing the packed values.</returns>
         public uint PackInt()
         {
-            return _virtualKey + (uint)_modifiers;
-        }
-
-        /// <summary>
-        /// Set key bind from packed uint.
-        /// </summary>
-        /// <param name="packed">A uint value previously packed with PackInt()</param>
-        public void SetFromPackedInt(uint packed)
-        {
-            _modifiers = (KeyboardModifiers)(packed & 0xFFFF0000);
-            _virtualKey = (byte)(packed & 0xFF);
+            return VirtualKey + (uint)Modifiers;
         }
 
         /// <summary>
@@ -80,7 +59,7 @@ namespace Angelo.Keybinds
         /// <returns>Array of virtual key codes: [...modifiers, key]. Empty array is no key bind is set.</returns>
         public byte[] GetVKeyArray()
         {
-            if (_virtualKey == 0)
+            if (VirtualKey == 0)
                 return Array.Empty<byte>();
 
             // Virtual key codes for modifier keys because import for Keys enum is not working idk
@@ -93,31 +72,31 @@ namespace Angelo.Keybinds
 
             foreach (var flag in values)
             {
-                if (_modifiers.HasFlag(flag))
+                if (Modifiers.HasFlag(flag))
                     modifierCount++;
             }
 
             byte[] virtualKeys = new byte[1 + modifierCount];
 
-            virtualKeys[modifierCount] = _virtualKey;
+            virtualKeys[modifierCount] = VirtualKey;
 
             if (modifierCount > 0)
             {
                 modifierCount--;
 
-                if (_modifiers.HasFlag(KeyboardModifiers.SHIFT))
+                if (Modifiers.HasFlag(KeyboardModifiers.SHIFT))
                 {
                     virtualKeys[modifierCount] = VK_LSHIFT;
                     modifierCount--;
                 }
 
-                if (_modifiers.HasFlag(KeyboardModifiers.CTRL))
+                if (Modifiers.HasFlag(KeyboardModifiers.CTRL))
                 {
                     virtualKeys[modifierCount] = VK_LCTRL;
                     modifierCount--;
                 }
 
-                if (_modifiers.HasFlag(KeyboardModifiers.ALT))
+                if (Modifiers.HasFlag(KeyboardModifiers.ALT))
                 {
                     virtualKeys[modifierCount] = VK_LALT;
                 }
@@ -130,23 +109,33 @@ namespace Angelo.Keybinds
         /// Get a string representation of the key bind.
         /// </summary>
         /// <returns>The string describing the key bind.</returns>
-        public string GetKeyBindString()
+        override public string ToString()
         {
             string str = "";
 
-            if (_virtualKey == 0)
+            if (VirtualKey == 0)
                 return str;
 
-            if (_modifiers.HasFlag(KeyboardModifiers.SHIFT))
+            if (Modifiers.HasFlag(KeyboardModifiers.SHIFT))
                 str += "Shift + ";
 
-            if (_modifiers.HasFlag(KeyboardModifiers.CTRL))
+            if (Modifiers.HasFlag(KeyboardModifiers.CTRL))
                 str += "Ctrl + ";
 
-            if (_modifiers.HasFlag(KeyboardModifiers.ALT))
+            if (Modifiers.HasFlag(KeyboardModifiers.ALT))
                 str += "Alt + ";
 
-            return str + KeyBindHelpers.GetCharFromVirtKey(_virtualKey);
+            return str + KeyBindHelpers.GetCharFromVirtKey(VirtualKey);
+        }
+
+        /// <summary>
+        /// Check if other KeyBind has same values set.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>True if values are the same.</returns>
+        public bool IsEqualTo(KeyBind other)
+        {
+            return other.VirtualKey == VirtualKey && other.Modifiers == Modifiers;
         }
     }
 }
