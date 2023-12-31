@@ -72,7 +72,8 @@ namespace Angelo.Keybinds
                 case KeyBindId.LURE:
                     _settingsData.LureKey = keyBind;
                     break;
-                default: throw new ArgumentException("Invalid KeyBindId"),
+                default: 
+                    throw new ArgumentException("Invalid KeyBindId");
             }
         }
 
