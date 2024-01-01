@@ -43,6 +43,17 @@ namespace Angelo.Screen
         /// <param name="height"></param>
         public void Update(int xStart, int yStart, int width, int height)
         {
+            if (xStart > Screen.Width || xStart < 0)
+                throw new ArgumentOutOfRangeException(nameof(xStart), "Values must fit into screen dimensions!");
+            if (yStart > Screen.Height || yStart < 0)
+                throw new ArgumentOutOfRangeException(nameof(yStart), "Values must fit into screen dimensions!");
+            if (width > Screen.Width || width < 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Values must fit into screen dimensions!");
+            if (height > Screen.Height || height < 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Values must fit into screen dimensions!");
+            if (xStart + width > Screen.Width || yStart + height > Screen.Height)
+                throw new ArgumentException("Resulting rectangle must fit within screen dimensions!");
+
             _bmp.UnlockBits(_bmpd);
             _gfx.CopyFromScreen(xStart, yStart, xStart, yStart, new Size(width, height), CopyPixelOperation.SourceCopy);
             // Not reducing dimensions here doesn't seem to impact performance in any meaningful way.
@@ -74,10 +85,16 @@ namespace Angelo.Screen
         /// <returns>Bitmap with the current state from last Update() or UpdatePartial() call.</returns>
         public Bitmap GetBitmapFromBuffer(int xStart, int yStart, int width, int height, int pixelRatio = 1)
         {
-            if (xStart + width > Screen.Width)
-                throw new ArgumentOutOfRangeException(nameof(xStart), "xStart + width can't be > than src width!");
-            if (yStart + height > Screen.Height)
-                throw new ArgumentOutOfRangeException(nameof(xStart), "yStart + height can't be > than src height!");
+            if (xStart > Screen.Width || xStart < 0)
+                throw new ArgumentOutOfRangeException(nameof(xStart), "Values must fit into screen dimensions!");
+            if (yStart > Screen.Height || yStart < 0)
+                throw new ArgumentOutOfRangeException(nameof(yStart), "Values must fit into screen dimensions!");
+            if (width > Screen.Width || width < 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Values must fit into screen dimensions!");
+            if (height > Screen.Height || height < 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Values must fit into screen dimensions!");
+            if (xStart + width > Screen.Width || yStart + height > Screen.Height)
+                throw new ArgumentException("Resulting rectangle must fit within screen dimensions!");
             if (pixelRatio != 1 && pixelRatio % 2 != 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelRatio), "Ratio has to be divisible by 2!");
 
@@ -86,7 +103,7 @@ namespace Angelo.Screen
             int xEnd = xStart + width;
             int yEnd = yStart + height;
 
-            Bitmap recostructed = new((int)width, (int)height, PIXELFORMART);
+            Bitmap recostructed = new(width, height, PIXELFORMART);
 
             unsafe
             {
@@ -97,7 +114,7 @@ namespace Angelo.Screen
                 {
                     for (int y = yStart; y < yEnd; y++)
                     {
-                        pixelPtr = (int*)_bmpd.Scan0 + (pixelRatio * y * _bmpd.Stride / BITS_PER_PIXEL) + x * pixelRatio;
+                        pixelPtr = (int*)_bmpd.Scan0 + ((y * _bmpd.Stride / BITS_PER_PIXEL) + x) * pixelRatio;
                         pixelValue = *pixelPtr & 0xFFFFFF;
                         pixelValue |= unchecked((int)0xFF000000);
                         recostructed.SetPixel(x - xStart, y - yStart, Color.FromArgb(pixelValue));
@@ -123,9 +140,9 @@ namespace Angelo.Screen
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public PixelColor GetPixel(int x, int y)
         {
-            if (x >= Screen.Width)
+            if (x >= Screen.Width || x < 0)
                 throw new ArgumentOutOfRangeException(nameof(x), "Coordinate can't be outside of screen!");
-            if (y >= Screen.Height)
+            if (y >= Screen.Height || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y), "Coordinate can't be outside of screen!");
 
             unsafe
@@ -149,9 +166,9 @@ namespace Angelo.Screen
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public bool CheckColorAt(int x, int y, int val)
         {
-            if (x >= Screen.Width)
+            if (x >= Screen.Width || x < 0)
                 throw new ArgumentOutOfRangeException(nameof(x), "Coordinate can't be outside of screen!");
-            if (y >= Screen.Height)
+            if (y >= Screen.Height || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y), "Coordinate can't be outside of screen!");
 
             unsafe
@@ -172,10 +189,10 @@ namespace Angelo.Screen
         /// <summary>
         /// Find the first pixel matching the color. Using this after UpdatePartial() may have unexpected results.
         /// </summary>
-        /// <param name="value">The pixel color value to look for.</param>
+        /// <param name="searchValue">The pixel color value to look for.</param>
         /// <param name="offset">Start search from this offset.</param>
         /// <returns>Point with the pixel position. Has no value if no pixel was found.</returns>
-        public Point? FindPixel(int value, int offset = 0)
+        public Point? FindPixel(int searchValue, int offset = 0)
         {
             unsafe
             {
@@ -186,7 +203,7 @@ namespace Angelo.Screen
                 for (; offset < length; offset++)
                 {
                     pixelValue = pixelPtr[offset] & 0xFFFFFF;
-                    if (pixelValue == value)
+                    if (pixelValue == searchValue)
                     {
                         int y = offset / linePxCount;
                         int x = offset % linePxCount;
