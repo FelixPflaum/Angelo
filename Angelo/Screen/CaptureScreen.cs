@@ -82,12 +82,12 @@ namespace Angelo.Screen
             if (pixelRatio != 1 && pixelRatio % 2 != 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelRatio), "Ratio has to be divisible by 2!");
 
-            Bitmap recostructed = new((int)width, (int)height, PIXELFORMART);
-
             width /= pixelRatio;
             height /= pixelRatio;
             uint xEnd = xStart + width;
             uint yEnd = yStart + height;
+
+            Bitmap recostructed = new((int)width, (int)height, PIXELFORMART);
 
             unsafe
             {
