@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Angelo.KBM;
+using System;
 using System.Linq;
 using System.Windows.Input;
-using Angelo.KBM;
 
 namespace Angelo.Keybinds
 {

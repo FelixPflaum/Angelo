@@ -14,10 +14,10 @@ namespace Angelo.Bot
         private readonly KeyboardHandler _keyboard;
         private readonly SettingsData _settings;
 
-        private LogCallback _logCallback;
-        private ExitCallback _exitCallback;
+        private readonly LogCallback _logCallback;
+        private readonly ExitCallback _exitCallback;
 
-        private Object _stopLock = new();
+        private readonly Object _stopLock = new();
         private bool _shouldStop;
 
         public Fisher(LogCallback lcb, ExitCallback ecb)

@@ -19,7 +19,7 @@ namespace Angelo.Bot
         public bool SendFish()
         {
             byte[] keys = _settings.FishingKey.Value.GetVKeyArray();
-            
+
             if (keys.Length == 0)
                 return false;
 

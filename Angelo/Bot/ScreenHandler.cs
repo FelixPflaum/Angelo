@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Angelo.Screen;
+using System;
 using System.Drawing;
-using Angelo.Screen;
 
 namespace Angelo.Bot
 {
@@ -37,7 +37,7 @@ namespace Angelo.Bot
             int dataY = a0.Y;
 
             if (!noUpdate)
-                _capture.UpdatePartial(dataX, dataY, 1, 1);
+                _capture.Update(dataX, dataY, 1, 1);
 
             PixelColor pixel = _capture.GetPixel((uint)dataX, (uint)dataY);
             return pixel.Contains((uint)colors);
@@ -67,7 +67,7 @@ namespace Angelo.Bot
             int width = _anchorPositions[3].X - xStart;
             int height = _anchorPositions[3].Y - yStart;
 
-            _capture.UpdatePartial(xStart, yStart, width, height);
+            _capture.Update(xStart, yStart, width, height);
 
             foreach (Point a in _anchorPositions)
             {
@@ -151,7 +151,7 @@ namespace Angelo.Bot
             int count = 0;
 
             if (!dontUpdate)
-                _capture.UpdatePartial((int)x, (int)y, (int)sideLength, (int)sideLength);
+                _capture.Update((int)x, (int)y, (int)sideLength, (int)sideLength);
 
             while (y < endY)
             {

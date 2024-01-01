@@ -1,7 +1,7 @@
 ﻿using System;
+using static Angelo.KBM.KBMHelpers;
 using static Angelo.WinAPI.User32;
 using static Angelo.WinAPI.User32Defs;
-using static Angelo.KBM.KBMHelpers;
 
 namespace Angelo.Bot
 {

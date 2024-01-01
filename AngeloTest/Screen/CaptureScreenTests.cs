@@ -59,7 +59,7 @@ namespace Angelo.Screen.Tests
 
             //Partial update and check pixels
             {
-                cap.UpdatePartial(200, 300, 100, 100);
+                cap.Update(200, 300, 100, 100);
                 PixelColor pxc = cap.GetPixel(222, 333);
                 Assert.IsFalse(pxc.Value == COLOR_FILL, "GetPixel color did not change after update!");
                 Assert.IsFalse(cap.CheckColorAt(222, 333, COLOR_FILL), "CheckColorAt did not change after update!");
@@ -68,8 +68,8 @@ namespace Angelo.Screen.Tests
 
             // Update single pixels and check
             {
-                cap.UpdatePartial(444, 444, 1, 1);
-                cap.UpdatePartial(555, 555, 1, 1);
+                cap.Update(444, 444, 1, 1);
+                cap.Update(555, 555, 1, 1);
 
                 PixelColor pxc1 = cap.GetPixel(444, 444);
                 PixelColor pxc2 = cap.GetPixel(555, 555);

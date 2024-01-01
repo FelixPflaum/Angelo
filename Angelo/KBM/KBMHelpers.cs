@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Angelo.Screen;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
-using Angelo.Screen;
 using static Angelo.WinAPI.User32;
 using static Angelo.WinAPI.User32Defs;
 

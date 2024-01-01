@@ -4,7 +4,7 @@ namespace Angelo.Settings
 {
     internal class Setting<T>
     {
-        private Object _lock = new();
+        private readonly Object _lock = new();
         private T _value;
         private readonly T _default;
 

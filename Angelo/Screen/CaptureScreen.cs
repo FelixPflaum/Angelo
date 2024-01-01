@@ -41,13 +41,12 @@ namespace Angelo.Screen
         /// <param name="yStart"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public void UpdatePartial(int xStart, int yStart, int width, int height)
+        public void Update(int xStart, int yStart, int width, int height)
         {
             _bmp.UnlockBits(_bmpd);
             _gfx.CopyFromScreen(xStart, yStart, xStart, yStart, new Size(width, height), CopyPixelOperation.SourceCopy);
-            //_bmpd = _bmp.LockBits(new Rectangle(xStart, yStart, width, height), ImageLockMode.ReadOnly, PIXELFORMART);
-            // This does not seem to change the duration of this operation in any meaningful way.
-            // The bottleneck seems to be somewhere else. Why not have constant dimensions then?
+            // Not reducing dimensions here doesn't seem to impact performance in any meaningful way.
+            // Leave dimensions constant to make things easier.
             _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PIXELFORMART);
         }
 
