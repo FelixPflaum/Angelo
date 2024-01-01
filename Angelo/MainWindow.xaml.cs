@@ -38,11 +38,11 @@ namespace Angelo
         /// </summary>
         private void LoadSettings()
         {
-            SensSlider.Value = _settings.Sensitivity;
-            ThresSlider.Value = _settings.Threshold;
-            LureCheckbox.IsChecked = _settings.UseLure;
-            FishingKeyInput.Text = _settings.FishingKey.ToString();
-            LureKeyInput.Text = _settings.LureKey.ToString();
+            SensSlider.Value = _settings.Sensitivity.Value;
+            ThresSlider.Value = _settings.Threshold.Value;
+            LureCheckbox.IsChecked = _settings.UseLure.Value;
+            FishingKeyInput.Text = _settings.FishingKey.Value.ToString();
+            LureKeyInput.Text = _settings.LureKey.Value.ToString();
 
             if (SettingsManager.WereSettingsLoaded())
                 AddLogLine("Settings restored from file!");
@@ -61,25 +61,25 @@ namespace Angelo
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-                _settings.Sensitivity = (int)SensSlider.Value;
+                _settings.Sensitivity.Value = (int)SensSlider.Value;
         }
 
         private void ThresSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
-                _settings.Threshold = (int)ThresSlider.Value;
+                _settings.Threshold.Value = (int)ThresSlider.Value;
         }
 
         private void FishingKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (_bindManager.SetKey(KeyBindId.FISHING, e.Key))
-                FishingKeyInput.Text = _settings.FishingKey.ToString();
+                FishingKeyInput.Text = _settings.FishingKey.Value.ToString();
         }
 
         private void LureKeyInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (_bindManager.SetKey(KeyBindId.LURE, e.Key))
-                LureKeyInput.Text = _settings.LureKey.ToString();
+                LureKeyInput.Text = _settings.LureKey.Value.ToString();
         }
 
         private void KeyInput_KeyUp(object sender, KeyEventArgs e)
@@ -89,7 +89,7 @@ namespace Angelo
 
         private void LureCheckbox_Click(object sender, RoutedEventArgs e)
         {
-            _settings.UseLure = LureCheckbox.IsChecked == true;
+            _settings.UseLure.Value = LureCheckbox.IsChecked == true;
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)

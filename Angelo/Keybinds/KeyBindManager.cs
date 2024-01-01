@@ -56,8 +56,8 @@ namespace Angelo.Keybinds
         {
             return keyBindId switch
             {
-                KeyBindId.FISHING => _settingsData.FishingKey,
-                KeyBindId.LURE => _settingsData.LureKey,
+                KeyBindId.FISHING => _settingsData.FishingKey.Value,
+                KeyBindId.LURE => _settingsData.LureKey.Value,
                 _ => throw new ArgumentException("Invalid KeyBindId"),
             };
         }
@@ -67,10 +67,10 @@ namespace Angelo.Keybinds
             switch (keyBindId)
             {
                 case KeyBindId.FISHING:
-                    _settingsData.FishingKey = keyBind;
+                    _settingsData.FishingKey.Value = keyBind;
                     break;
                 case KeyBindId.LURE:
-                    _settingsData.LureKey = keyBind;
+                    _settingsData.LureKey.Value = keyBind;
                     break;
                 default: 
                     throw new ArgumentException("Invalid KeyBindId");

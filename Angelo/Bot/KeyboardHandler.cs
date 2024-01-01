@@ -18,7 +18,7 @@ namespace Angelo.Bot
         /// <returns>True if keys were send successfully.</returns>
         public bool SendFish()
         {
-            byte[] keys = _settings.FishingKey.GetVKeyArray();
+            byte[] keys = _settings.FishingKey.Value.GetVKeyArray();
             
             if (keys.Length == 0)
                 return false;
@@ -32,7 +32,7 @@ namespace Angelo.Bot
         /// <returns>True if keys were send successfully.</returns>
         public bool SendLure()
         {
-            byte[] keys = _settings.LureKey.GetVKeyArray();
+            byte[] keys = _settings.LureKey.Value.GetVKeyArray();
 
             if (keys.Length == 0)
                 return false;

@@ -1,29 +1,14 @@
 ﻿using Angelo.Keybinds;
-using System.Text.Json.Serialization;
+using System.Windows.Input;
 
 namespace Angelo.Settings
 {
     internal class SettingsData
     {
-        public int Sensitivity { get; set; } = 100;
-        public int Threshold { get; set; } = 10;
-        public bool UseLure { get; set; } = false;
-
-        [JsonConverter(typeof(KeyBindJsonConverter))]
-        public KeyBind FishingKey { get; set; } = new();
-
-        [JsonConverter(typeof(KeyBindJsonConverter))]
-        public KeyBind LureKey { get; set; } = new();
-
-        public SettingsData() { }
-
-        public void SetFromData(SettingsData data)
-        {
-            Sensitivity = data.Sensitivity;
-            Threshold = data.Threshold;
-            UseLure = data.UseLure;
-            FishingKey = data.FishingKey;
-            LureKey = data.LureKey;
-        }
+        public Setting<int> Sensitivity { get; } = new(120);
+        public Setting<int> Threshold { get; } = new(10);
+        public Setting<bool> UseLure { get; } = new(false);
+        public Setting<KeyBind> FishingKey { get; } = new(new KeyBind((byte)KeyInterop.VirtualKeyFromKey(Key.D6), KBM.KeyboardModifiers.CTRL));
+        public Setting<KeyBind> LureKey { get; } = new(new KeyBind((byte)KeyInterop.VirtualKeyFromKey(Key.D7), KBM.KeyboardModifiers.CTRL));
     }
 }

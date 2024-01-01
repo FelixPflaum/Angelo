@@ -39,14 +39,14 @@ namespace Angelo.Bot
         {
             try
             {
-                int orig = _settings.Sensitivity;
+                int orig = _settings.Sensitivity.Value;
 
                 while (!_shouldStop)
                 {
-                    if (orig != _settings.Sensitivity)
+                    if (orig != _settings.Sensitivity.Value)
                     {
-                        _logCallback(_settings.Sensitivity.ToString());
-                        orig = _settings.Sensitivity;
+                        _logCallback(_settings.Sensitivity.Value.ToString());
+                        orig = _settings.Sensitivity.Value;
                     }
                     Thread.Sleep(1);
                 }
