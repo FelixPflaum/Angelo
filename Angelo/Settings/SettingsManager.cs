@@ -53,7 +53,8 @@ namespace Angelo.Settings
                 try
                 {
                     Type settingsDataType = typeof(SettingsData);
-                    string[] lines = cfgFile.Split("\n");
+                    cfgFile = cfgFile.ReplaceLineEndings();
+                    string[] lines = cfgFile.Split(Environment.NewLine);
 
                     foreach (string line in lines)
                     {
@@ -115,13 +116,13 @@ namespace Angelo.Settings
                     if (val != null)
                     {
                         if (propType == typeof(string))
-                            outBuilder.AppendFormat("{0}=\"{1}\"\n", property.Name, ((Setting<string>)val).Value);
+                            outBuilder.AppendFormat("{0}=\"{1}\"{2}", property.Name, ((Setting<string>)val).Value, Environment.NewLine);
                         else if (propType == typeof(bool))
-                            outBuilder.AppendFormat("{0}={1}\n", property.Name, ((Setting<bool>)val).Value);
+                            outBuilder.AppendFormat("{0}={1}{2}", property.Name, ((Setting<bool>)val).Value, Environment.NewLine);
                         else if (propType == typeof(int))
-                            outBuilder.AppendFormat("{0}={1}\n", property.Name, ((Setting<int>)val).Value);
+                            outBuilder.AppendFormat("{0}={1}{2}", property.Name, ((Setting<int>)val).Value, Environment.NewLine);
                         else if (propType == typeof(KeyBind))
-                            outBuilder.AppendFormat("{0}={1}\n", property.Name, ((Setting<KeyBind>)val).Value.PackInt());
+                            outBuilder.AppendFormat("{0}={1}{2}", property.Name, ((Setting<KeyBind>)val).Value.PackInt(), Environment.NewLine);
                         else
                             throw new NotImplementedException(String.Format("Serialization of type {0} is not implemented!", propType.Name));
                     }

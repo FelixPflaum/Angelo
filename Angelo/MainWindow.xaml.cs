@@ -54,7 +54,13 @@ namespace Angelo
         /// <param name="line">The line to add.</param>
         public void AddLogLine(string line)
         {
-            LogBox.AppendText(line + "\n");
+            if (LogBox.LineCount > 100)
+            {
+                char[] nlArr = Environment.NewLine.ToCharArray();
+                LogBox.Text = LogBox.Text.Substring(LogBox.Text.IndexOfAny(nlArr) + nlArr.Length);
+            }
+
+            LogBox.AppendText(line + Environment.NewLine);
             LogBox.ScrollToEnd();
         }
 
