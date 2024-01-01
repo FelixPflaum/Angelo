@@ -45,7 +45,7 @@ namespace Angelo.Screen
                 if (!EnumDisplaySettings(primaryDevName, ENUM_CURRENT_SETTINGS, out DEVMODE devmode))
                     throw new Exception("Can't get primary display DEVMODE!");
 
-                screenData = new ScreenData(devmode.dmPelsWidth, devmode.dmPelsHeight, devmode.dmDisplayFrequency);
+                screenData = new ScreenData((int)devmode.dmPelsWidth, (int)devmode.dmPelsHeight, (int)devmode.dmDisplayFrequency);
             }
 
             return screenData.Value;

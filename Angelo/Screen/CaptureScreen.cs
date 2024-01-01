@@ -7,7 +7,7 @@ namespace Angelo.Screen
     internal class CaptureScreen
     {
         private const PixelFormat PIXELFORMART = PixelFormat.Format32bppRgb;
-        private const uint BITS_PER_PIXEL = 4;
+        private const int BITS_PER_PIXEL = 4;
 
         private readonly Bitmap _bmp;
         private readonly Graphics _gfx;
@@ -18,7 +18,7 @@ namespace Angelo.Screen
         public CaptureScreen()
         {
             Screen = ScreenHelpers.GetScreenData();
-            _bmp = new Bitmap((int)Screen.Width, (int)Screen.Height, PIXELFORMART);
+            _bmp = new Bitmap(Screen.Width, Screen.Height, PIXELFORMART);
             _gfx = Graphics.FromImage(_bmp);
             _gfx.CopyFromScreen(0, 0, 0, 0, new Size(0, 0), CopyPixelOperation.SourceCopy);
             _bmpd = _bmp.LockBits(new Rectangle(0, 0, 1, 1), ImageLockMode.ReadOnly, PIXELFORMART);
@@ -30,7 +30,7 @@ namespace Angelo.Screen
         public void Update()
         {
             _bmp.UnlockBits(_bmpd);
-            _gfx.CopyFromScreen(0, 0, 0, 0, new Size((int)Screen.Width, (int)Screen.Height), CopyPixelOperation.SourceCopy);
+            _gfx.CopyFromScreen(0, 0, 0, 0, new Size(Screen.Width, Screen.Height), CopyPixelOperation.SourceCopy);
             _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, PIXELFORMART);
         }
 
@@ -56,7 +56,7 @@ namespace Angelo.Screen
         /// <param name="bmp"></param>
         /// <param name="x">x coordinate of top left corner.</param>
         /// <param name="y">y coordinate of top left corner.</param>
-        public void SetBitmap(Bitmap bmp, uint x, uint y)
+        public void SetBitmap(Bitmap bmp, int x, int y)
         {
             _bmp.UnlockBits(_bmpd);
             _gfx.DrawImage(bmp, x, y);
@@ -72,7 +72,7 @@ namespace Angelo.Screen
         /// <param name="height"></param>
         /// <param name="pixelRatio">How many pixels to map to one pixel on the created Bitmap.</param>
         /// <returns>Bitmap with the current state from last Update() or UpdatePartial() call.</returns>
-        public Bitmap GetBitmapFromBuffer(uint xStart, uint yStart, uint width, uint height, uint pixelRatio = 1)
+        public Bitmap GetBitmapFromBuffer(int xStart, int yStart, int width, int height, int pixelRatio = 1)
         {
             if (xStart + width > Screen.Width)
                 throw new ArgumentOutOfRangeException(nameof(xStart), "xStart + width can't be > than src width!");
@@ -83,24 +83,24 @@ namespace Angelo.Screen
 
             width /= pixelRatio;
             height /= pixelRatio;
-            uint xEnd = xStart + width;
-            uint yEnd = yStart + height;
+            int xEnd = xStart + width;
+            int yEnd = yStart + height;
 
             Bitmap recostructed = new((int)width, (int)height, PIXELFORMART);
 
             unsafe
             {
-                uint* pixelPtr = (uint*)_bmpd.Scan0;
-                uint pixelValue;
+                int* pixelPtr = (int*)_bmpd.Scan0;
+                int pixelValue;
 
-                for (uint x = xStart; x < xEnd; x++)
+                for (int x = xStart; x < xEnd; x++)
                 {
-                    for (uint y = yStart; y < yEnd; y++)
+                    for (int y = yStart; y < yEnd; y++)
                     {
-                        pixelPtr = (uint*)_bmpd.Scan0 + (pixelRatio * y * _bmpd.Stride / BITS_PER_PIXEL) + x * pixelRatio;
+                        pixelPtr = (int*)_bmpd.Scan0 + (pixelRatio * y * _bmpd.Stride / BITS_PER_PIXEL) + x * pixelRatio;
                         pixelValue = *pixelPtr & 0xFFFFFF;
-                        pixelValue |= 0xFF000000;
-                        recostructed.SetPixel((int)(x - xStart), (int)(y - yStart), Color.FromArgb((int)pixelValue));
+                        pixelValue |= unchecked((int)0xFF000000);
+                        recostructed.SetPixel(x - xStart, y - yStart, Color.FromArgb(pixelValue));
                     }
                 }
             }
@@ -108,8 +108,8 @@ namespace Angelo.Screen
             return recostructed;
         }
 
-        /// <inheritdoc cref="GetBitmapFromBuffer(uint, uint, uint, uint, uint)"/>
-        public Bitmap GetBitmapFromBuffer(uint pixelRatio = 1)
+        /// <inheritdoc cref="GetBitmapFromBuffer(int, int, int, int, int)"/>
+        public Bitmap GetBitmapFromBuffer(int pixelRatio = 1)
         {
             return GetBitmapFromBuffer(0, 0, Screen.Width, Screen.Height, pixelRatio);
         }
@@ -121,7 +121,7 @@ namespace Angelo.Screen
         /// <param name="y"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public PixelColor GetPixel(uint x, uint y)
+        public PixelColor GetPixel(int x, int y)
         {
             if (x >= Screen.Width)
                 throw new ArgumentOutOfRangeException(nameof(x), "Coordinate can't be outside of screen!");
@@ -131,7 +131,7 @@ namespace Angelo.Screen
             unsafe
             {
                 byte* pixelRow = (byte*)_bmpd.Scan0 + (y * _bmpd.Stride);
-                uint pixelStart = x * BITS_PER_PIXEL;
+                int pixelStart = x * BITS_PER_PIXEL;
                 byte b = pixelRow[pixelStart];
                 byte g = pixelRow[pixelStart + 1];
                 byte r = pixelRow[pixelStart + 2];
@@ -147,7 +147,7 @@ namespace Angelo.Screen
         /// <param name="val"></param>
         /// <returns>True if color at postition is equal.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public bool CheckColorAt(uint x, uint y, uint val)
+        public bool CheckColorAt(int x, int y, int val)
         {
             if (x >= Screen.Width)
                 throw new ArgumentOutOfRangeException(nameof(x), "Coordinate can't be outside of screen!");
@@ -156,15 +156,15 @@ namespace Angelo.Screen
 
             unsafe
             {
-                uint* pixelPtr = (uint*)_bmpd.Scan0 + (y * _bmpd.Stride / BITS_PER_PIXEL) + x;
-                uint pixelVal = *pixelPtr & 0xFFFFFF;
+                int* pixelPtr = (int*)_bmpd.Scan0 + (y * _bmpd.Stride / BITS_PER_PIXEL) + x;
+                int pixelVal = *pixelPtr & 0xFFFFFF;
                 return pixelVal == val;
             }
         }
 
         /// <param name="r"></param>
-        /// <inheritdoc cref="CheckColorAt(uint, uint, uint)"/>
-        public bool CheckColorAt(uint x, uint y, PixelColor pc)
+        /// <inheritdoc cref="CheckColorAt(int, int, int)"/>
+        public bool CheckColorAt(int x, int y, PixelColor pc)
         {
             return CheckColorAt(x, y, pc.Value);
         }
@@ -175,21 +175,21 @@ namespace Angelo.Screen
         /// <param name="value">The pixel color value to look for.</param>
         /// <param name="offset">Start search from this offset.</param>
         /// <returns>Point with the pixel position. Has no value if no pixel was found.</returns>
-        public Point? FindPixel(uint value, uint offset = 0)
+        public Point? FindPixel(int value, int offset = 0)
         {
             unsafe
             {
-                uint linePxCount = (uint)_bmpd.Stride / BITS_PER_PIXEL;
-                uint length = linePxCount * (uint)_bmpd.Height;
-                uint* pixelPtr = (uint*)_bmpd.Scan0;
-                uint pixelValue;
+                int linePxCount = _bmpd.Stride / BITS_PER_PIXEL;
+                int length = linePxCount * _bmpd.Height;
+                int* pixelPtr = (int*)_bmpd.Scan0;
+                int pixelValue;
                 for (; offset < length; offset++)
                 {
                     pixelValue = pixelPtr[offset] & 0xFFFFFF;
                     if (pixelValue == value)
                     {
-                        int y = (int)(offset / linePxCount);
-                        int x = (int)(offset % linePxCount);
+                        int y = offset / linePxCount;
+                        int x = offset % linePxCount;
                         return new Point(x, y);
                     }
                 }
@@ -198,20 +198,20 @@ namespace Angelo.Screen
             return null;
         }
 
-        /// <inheritdoc cref="FindPixel(uint, uint)"/>
-        public Point? FindPixel(PixelColor pc, uint offset = 0)
+        /// <inheritdoc cref="FindPixel(int, int)"/>
+        public Point? FindPixel(PixelColor pc, int offset = 0)
         {
             return FindPixel(pc.Value, offset);
         }
 
-        /// <inheritdoc cref="FindPixel(uint, uint)"/>
-        public Point? FindPixel(uint value, Point offset)
+        /// <inheritdoc cref="FindPixel(int, int)"/>
+        public Point? FindPixel(int value, Point offset)
         {
-            uint offsetVal = (uint)(offset.X + offset.Y * Screen.Width);
+            int offsetVal = offset.X + offset.Y * Screen.Width;
             return FindPixel(value, offsetVal);
         }
 
-        /// <inheritdoc cref="FindPixel(uint, uint)"/>
+        /// <inheritdoc cref="FindPixel(int, int)"/>
         public Point? FindPixel(PixelColor pc, Point offset)
         {
             return FindPixel(pc.Value, offset);

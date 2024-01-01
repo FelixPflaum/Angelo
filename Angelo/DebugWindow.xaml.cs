@@ -48,10 +48,10 @@ namespace Angelo
         {
             try
             {
-                uint x = UInt32.Parse(DInput1.Text);
-                uint y = UInt32.Parse(DInput2.Text);
-                uint w = UInt32.Parse(DInput3.Text);
-                uint h = UInt32.Parse(DInput4.Text);
+                int x = Int32.Parse(DInput1.Text);
+                int y = Int32.Parse(DInput2.Text);
+                int w = Int32.Parse(DInput3.Text);
+                int h = Int32.Parse(DInput4.Text);
                 var capt = new CaptureScreen();
                 capt.Update();
                 var bmp = capt.GetBitmapFromBuffer(x, y, w, h);

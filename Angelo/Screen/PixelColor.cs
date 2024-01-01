@@ -5,7 +5,7 @@
         public readonly byte R;
         public readonly byte G;
         public readonly byte B;
-        public readonly uint Value;
+        public readonly int Value;
 
         public PixelColor(byte r, byte g, byte b)
         {
@@ -13,11 +13,11 @@
             G = g;
             B = b;
             Value = b;
-            Value += (uint)g << 8;
-            Value += (uint)r << 16;
+            Value += g << 8;
+            Value += r << 16;
         }
 
-        public PixelColor(uint value)
+        public PixelColor(int value)
         {
             R = (byte)(value >> 16 & 0xFF);
             G = (byte)(value >> 8 & 0xFF);
@@ -30,7 +30,7 @@
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public readonly bool Contains(uint value)
+        public readonly bool Contains(int value)
         {
             return (Value & value) == value;
         }
@@ -62,7 +62,7 @@
 
         public override readonly int GetHashCode()
         {
-            return (int)Value;
+            return Value;
         }
 
         public override readonly bool Equals(object? obj)

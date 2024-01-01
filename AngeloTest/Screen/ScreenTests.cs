@@ -12,13 +12,13 @@ namespace AngeloTest.Screen
                 byte r = 0x9C;
                 byte g = 0x37;
                 byte b = 0x7A;
-                uint expectedValue = 0x9C377A;
+                int expectedValue = 0x9C377A;
                 var pc = new PixelColor(r, g, b);
                 Assert.AreEqual(pc.Value, expectedValue, "PixelColor sets wrong value!");
             }
 
             {
-                uint value = 0x14A1F9;
+                int value = 0x14A1F9;
                 byte expectedR = 0x14;
                 byte expectedG = 0xA1;
                 byte expectedB = 0xF9;

@@ -39,8 +39,8 @@ namespace Angelo.Bot
             if (!noUpdate)
                 _capture.Update(dataX, dataY, 1, 1);
 
-            PixelColor pixel = _capture.GetPixel((uint)dataX, (uint)dataY);
-            return pixel.Contains((uint)colors);
+            PixelColor pixel = _capture.GetPixel(dataX, dataY);
+            return pixel.Contains((int)colors);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Angelo.Bot
 
             foreach (Point a in _anchorPositions)
             {
-                if (!_capture.CheckColorAt((uint)a.X, (uint)a.Y, COLOR_ANCHOR))
+                if (!_capture.CheckColorAt(a.X, a.Y, COLOR_ANCHOR))
                     return false;
             }
             return true;
@@ -95,7 +95,7 @@ namespace Angelo.Bot
 
             while (nextAnchor < _anchorPositions.Length)
             {
-                Point? point = _capture.FindPixel(COLOR_ANCHOR, (uint)offset);
+                Point? point = _capture.FindPixel(COLOR_ANCHOR, offset);
 
                 if (point == null)
                     break;
@@ -142,16 +142,16 @@ namespace Angelo.Bot
         /// <param name="threshold">The color component threshold value.</param>
         /// <param name="dontUpdate">Set true to not update image data and reuse existing data.</param>
         /// <returns>The amount of pixels that satisfied the condition.</returns>
-        public int CountAreaPixelsAbove(uint x, uint y, uint sideLength, byte threshold, bool dontUpdate = false)
+        public int CountAreaPixelsAbove(int x, int y, int sideLength, byte threshold, bool dontUpdate = false)
         {
             x -= sideLength / 2;
             y -= sideLength / 2;
-            uint endX = x + sideLength;
-            uint endY = y + sideLength;
+            int endX = x + sideLength;
+            int endY = y + sideLength;
             int count = 0;
 
             if (!dontUpdate)
-                _capture.Update((int)x, (int)y, (int)sideLength, (int)sideLength);
+                _capture.Update(x, y, sideLength, sideLength);
 
             while (y < endY)
             {

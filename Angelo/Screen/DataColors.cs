@@ -3,7 +3,7 @@
 namespace Angelo.Screen
 {
     [Flags]
-    public enum DataColors : uint
+    public enum DataColors
     {
         InCombat = 0x000040,
         LureActive = 0x000080,

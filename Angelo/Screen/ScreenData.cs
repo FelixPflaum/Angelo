@@ -2,11 +2,11 @@
 {
     internal readonly struct ScreenData
     {
-        public readonly uint Width;
-        public readonly uint Height;
-        public readonly uint RefreshRate;
+        public readonly int Width;
+        public readonly int Height;
+        public readonly int RefreshRate;
 
-        public ScreenData(uint width, uint height, uint refreshRate)
+        public ScreenData(int width, int height, int refreshRate)
         {
             Width = width;
             Height = height;
