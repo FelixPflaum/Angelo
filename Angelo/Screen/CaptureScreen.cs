@@ -7,7 +7,7 @@ namespace Angelo.Screen
     internal class CaptureScreen
     {
         private const PixelFormat PIXELFORMART = PixelFormat.Format32bppRgb;
-        private const int BITS_PER_PIXEL = 4;
+        private const int BYTES_PER_PIXEL = 4;
 
         private readonly Bitmap _bmp;
         private readonly Graphics _gfx;
@@ -114,7 +114,7 @@ namespace Angelo.Screen
                 {
                     for (int y = yStart; y < yEnd; y++)
                     {
-                        pixelPtr = (int*)_bmpd.Scan0 + ((y * _bmpd.Stride / BITS_PER_PIXEL) + x) * pixelRatio;
+                        pixelPtr = (int*)_bmpd.Scan0 + ((y * _bmpd.Stride / BYTES_PER_PIXEL) + x) * pixelRatio;
                         pixelValue = *pixelPtr & 0xFFFFFF;
                         pixelValue |= unchecked((int)0xFF000000);
                         recostructed.SetPixel(x - xStart, y - yStart, Color.FromArgb(pixelValue));
@@ -148,7 +148,7 @@ namespace Angelo.Screen
             unsafe
             {
                 byte* pixelRow = (byte*)_bmpd.Scan0 + (y * _bmpd.Stride);
-                int pixelStart = x * BITS_PER_PIXEL;
+                int pixelStart = x * BYTES_PER_PIXEL;
                 byte b = pixelRow[pixelStart];
                 byte g = pixelRow[pixelStart + 1];
                 byte r = pixelRow[pixelStart + 2];
@@ -173,7 +173,7 @@ namespace Angelo.Screen
 
             unsafe
             {
-                int* pixelPtr = (int*)_bmpd.Scan0 + (y * _bmpd.Stride / BITS_PER_PIXEL) + x;
+                int* pixelPtr = (int*)_bmpd.Scan0 + (y * _bmpd.Stride / BYTES_PER_PIXEL) + x;
                 int pixelVal = *pixelPtr & 0xFFFFFF;
                 return pixelVal == val;
             }
@@ -196,7 +196,7 @@ namespace Angelo.Screen
         {
             unsafe
             {
-                int linePxCount = _bmpd.Stride / BITS_PER_PIXEL;
+                int linePxCount = _bmpd.Stride / BYTES_PER_PIXEL;
                 int length = linePxCount * _bmpd.Height;
                 int* pixelPtr = (int*)_bmpd.Scan0;
                 int pixelValue;
