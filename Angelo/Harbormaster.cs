@@ -43,7 +43,6 @@ namespace Angelo
             if (_fisher != null)
             {
                 _fisher.BackToHarbor();
-                _startButton.SetToStart();
                 _startButton.SetActive(false);
                 return true;
             }
@@ -56,6 +55,7 @@ namespace Angelo
             {
                 _mainWindow.AddLogLine("Fishing ended.");
                 _fisher = null;
+                _startButton.SetToStart();
                 _startButton.SetActive(true);
             });
         }

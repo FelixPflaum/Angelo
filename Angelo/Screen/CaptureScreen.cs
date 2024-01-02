@@ -47,9 +47,9 @@ namespace Angelo.Screen
                 throw new ArgumentOutOfRangeException(nameof(xStart), "Values must fit into screen dimensions!");
             if (yStart > Screen.Height || yStart < 0)
                 throw new ArgumentOutOfRangeException(nameof(yStart), "Values must fit into screen dimensions!");
-            if (width > Screen.Width || width < 0)
+            if (width > Screen.Width || width <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width), "Values must fit into screen dimensions!");
-            if (height > Screen.Height || height < 0)
+            if (height > Screen.Height || height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height), "Values must fit into screen dimensions!");
             if (xStart + width > Screen.Width || yStart + height > Screen.Height)
                 throw new ArgumentException("Resulting rectangle must fit within screen dimensions!");
@@ -89,9 +89,9 @@ namespace Angelo.Screen
                 throw new ArgumentOutOfRangeException(nameof(xStart), "Values must fit into screen dimensions!");
             if (yStart > Screen.Height || yStart < 0)
                 throw new ArgumentOutOfRangeException(nameof(yStart), "Values must fit into screen dimensions!");
-            if (width > Screen.Width || width < 0)
+            if (width > Screen.Width || width <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width), "Values must fit into screen dimensions!");
-            if (height > Screen.Height || height < 0)
+            if (height > Screen.Height || height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height), "Values must fit into screen dimensions!");
             if (xStart + width > Screen.Width || yStart + height > Screen.Height)
                 throw new ArgumentException("Resulting rectangle must fit within screen dimensions!");

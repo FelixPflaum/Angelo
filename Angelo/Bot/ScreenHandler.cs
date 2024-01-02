@@ -6,8 +6,8 @@ namespace Angelo.Bot
 {
     internal class ScreenHandler
     {
-        private const int DATA_PX_OFFSET = 10;
-        private readonly PixelColor COLOR_ANCHOR = new(0xFF00FF);
+        private static readonly Point DATA_PX_OFFSET = new(3, 3);
+        private static readonly PixelColor[] ANCHOR_COLORS = { new(0xFF0000), new(0x00FF00), new(0x0000FF), new(0xFFFFFF) };
 
         private readonly CaptureScreen _capture;
         private readonly Point[] _anchorPositions;
@@ -33,8 +33,8 @@ namespace Angelo.Bot
                 throw new InvalidOperationException("CheckDataPixel can't be called before anchors are set!");
 
             Point a0 = _anchorPositions[0];
-            int dataX = a0.X + DATA_PX_OFFSET;
-            int dataY = a0.Y;
+            int dataX = a0.X + DATA_PX_OFFSET.X;
+            int dataY = a0.Y + DATA_PX_OFFSET.Y;
 
             if (!noUpdate)
                 _capture.Update(dataX, dataY, 1, 1);
@@ -60,7 +60,7 @@ namespace Angelo.Bot
         public bool AreAnchorsVisible()
         {
             if (!_haveAnchors)
-                throw new InvalidOperationException("CheckDataPixel can't be called before anchors are set!");
+                throw new InvalidOperationException("AreAnchorsVisible can't be called before anchors are set!");
 
             int xStart = _anchorPositions[0].X;
             int yStart = _anchorPositions[0].Y;
@@ -71,7 +71,7 @@ namespace Angelo.Bot
 
             foreach (Point a in _anchorPositions)
             {
-                if (!_capture.CheckColorAt(a.X, a.Y, COLOR_ANCHOR))
+                if (!_capture.CheckColorAt(a.X, a.Y, ANCHOR_COLORS[0]))
                     return false;
             }
             return true;
@@ -82,7 +82,7 @@ namespace Angelo.Bot
         /// This is required to succeeed for everything else to work.
         /// </summary>
         /// <returns>True if all anchor points were found.</returns>
-        public bool FindAnchors()
+        public bool SetupAnchors()
         {
             for (int i = 0; i < _anchorPositions.Length; i++)
             {
@@ -90,40 +90,50 @@ namespace Angelo.Bot
                 _anchorPositions[i].Y = 0;
             }
 
-            int nextAnchor = 0;
-            int offset = 0;
+            _capture.Update();
 
-            while (nextAnchor < _anchorPositions.Length)
+            int nextAnchor = 0;
+            Point offset = new(0, 0);
+
+            while (nextAnchor < 4)
             {
-                Point? point = _capture.FindPixel(COLOR_ANCHOR, offset);
+                Point? point = _capture.FindPixel(ANCHOR_COLORS[0], offset);
 
                 if (point == null)
                     break;
 
+                if (!_capture.CheckColorAt(point.Value.X + 1, point.Value.Y, ANCHOR_COLORS[1])
+                    || !_capture.CheckColorAt(point.Value.X, point.Value.Y + 1, ANCHOR_COLORS[2])
+                    || !_capture.CheckColorAt(point.Value.X + 1, point.Value.Y + 1, ANCHOR_COLORS[3]))
+                {
+                    offset = point.Value;
+                    offset.Offset(1, 0);
+                    continue;
+                }
+
                 switch (nextAnchor)
                 {
-                    case 2:
-                    case 0:
+                    case 0: // Top left
+                    case 2: // Bottom left
                         {
                             _anchorPositions[nextAnchor] = point.Value;
-                            // There will be multiple pixels. Skip them.
-                            offset = point.Value.X + 50;
+
+                            offset.X = _anchorPositions[0].X + 100;
+                            offset.Y = point.Value.Y;
                         }
                         break;
-                    case 1:
-                    case 3:
+                    case 1: // Top right
+                    case 3: // Bottom right
                         {
-                            // If this isn't on the same line we missed one.
                             if (_anchorPositions[nextAnchor - 1].Y != point.Value.Y)
                                 return false;
 
-                            _anchorPositions[1] = point.Value;
-                            // Set offset a few lines forward for to skip addition pixels.
-                            offset = (point.Value.Y + 10) * (int)_capture.Screen.Width;
+                            _anchorPositions[nextAnchor] = point.Value;
+
+                            offset.X = _anchorPositions[0].X;
+                            offset.Y = point.Value.Y + 100;
                         }
                         break;
-                    default:
-                        throw new IndexOutOfRangeException();
                 }
 
                 nextAnchor++;

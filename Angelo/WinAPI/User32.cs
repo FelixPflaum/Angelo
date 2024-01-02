@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using static Angelo.WinAPI.User32Defs;
 
@@ -92,5 +93,66 @@ namespace Angelo.WinAPI
         [DllImport("user32.dll")]
         public static extern int ToUnicode(uint virtualKeyCode, uint wScanCode, byte[] lpKeyState,
             [Out, MarshalAs(UnmanagedType.LPWStr, SizeConst = 1)] StringBuilder outBuffer, int outBufferLen, uint wFlags);
+
+        /// <summary>
+        /// Retrieves a handle to the foreground window (the window with which the user is currently working). 
+        /// The system assigns a slightly higher priority to the thread that creates the foreground window than it does to other threads.
+        /// </summary>
+        /// <returns>
+        /// The return value is a handle to the foreground window. 
+        /// The foreground window can be NULL in certain circumstances, such as when a window is losing activation.
+        /// </returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr GetForegroundWindow();
+
+        /// <summary>
+        /// Copies the text of the specified window's title bar (if it has one) into a buffer. 
+        /// If the specified window is a control, the text of the control is copied. 
+        /// However, GetWindowText cannot retrieve the text of a control in another application.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window or control containing the text.</param>
+        /// <param name="text">The buffer that will receive the text. If the string is as long or longer than the buffer, the string is truncated and terminated with a null character.</param>
+        /// <param name="count">The maximum number of characters to copy to the buffer, including the null character. If the text exceeds this limit, it is truncated.</param>
+        /// <returns>
+        /// If the function succeeds, the return value is the length, in characters, of the copied string, 
+        /// not including the terminating null character. If the window has no title bar or text, 
+        /// if the title bar is empty, or if the window or control handle is invalid, 
+        /// the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetWindowText(IntPtr hWnd, [Out, MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpString, int count);
+
+        /// <summary>
+        /// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar). 
+        /// If the specified window is a control, the function retrieves the length of the text within the control. 
+        /// However, GetWindowTextLength cannot retrieve the length of the text of an edit control in another application.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window or control.</param>
+        /// <returns>
+        /// If the function succeeds, the return value is the length, in characters, of the text. 
+        /// Under certain conditions, this value might be greater than the length of the text (see Remarks).
+        /// If the window has no text, the return value is zero.
+        /// Function failure is indicated by a return value of zero and a GetLastError result that is nonzero.
+        /// </returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+
+        /// <summary>
+        /// Retrieves a handle to the top-level window whose class name and window name match the specified strings. 
+        /// This function does not search child windows. This function does not perform a case-sensitive search.
+        /// To search child windows, beginning with a specified child window, use the FindWindowEx function.
+        /// </summary>
+        /// <param name="lpClassName">
+        /// The class name or a class atom created by a previous call to the RegisterClass or RegisterClassEx function. The atom must be in the low-order word of lpClassName; the high-order word must be zero.
+        /// If lpClassName points to a string, it specifies the window class name. The class name can be any name registered with RegisterClass or RegisterClassEx, or any of the predefined control-class names.
+        /// If lpClassName is NULL, it finds any window whose title matches the lpWindowName parameter.
+        /// </param>
+        /// <param name="lpWindowName">The window name (the window's title). If this parameter is NULL, all window names match.</param>
+        /// <returns>
+        /// If the function succeeds, the return value is a handle to the window that has the specified class name and window name.
+        /// If the function fails, the return value is NULL. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr FindWindow([Optional, MarshalAs(UnmanagedType.LPStr)] string? lpClassName, [Optional, MarshalAs(UnmanagedType.LPStr)] string? lpWindowName);
     }
 }
