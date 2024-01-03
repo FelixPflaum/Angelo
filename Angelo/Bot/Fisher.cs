@@ -278,6 +278,12 @@ namespace Angelo.Bot
             return null;
         }
 
+        /// <summary>
+        /// Periodically scans area around bobber for bright pixels above configured threshold.
+        /// If configured amount (sensitivity) of pixels is found it will right click.
+        /// </summary>
+        /// <param name="bobberPos"></param>
+        /// <returns></returns>
         private bool WaitAndCatch(Point bobberPos)
         {
             CallibrationWindow cWin = CallibrationWindow.GetInstance();
@@ -300,6 +306,7 @@ namespace Angelo.Bot
 
                 if (count >= _settings.Sensitivity.Value)
                 {
+                    WaitForMouseAndGame();
                     Log("Splash detected, clicking!");
                     SleepChecked(250, 1000);
                     _mouse.MoveTo(bobberPos);
