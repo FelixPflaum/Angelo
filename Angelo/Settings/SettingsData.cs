@@ -10,5 +10,7 @@ namespace Angelo.Settings
         public Setting<bool> UseLure { get; } = new(false);
         public Setting<KeyBind> FishingKey { get; } = new(new KeyBind((byte)KeyInterop.VirtualKeyFromKey(Key.D6), KBM.KeyboardModifiers.CTRL));
         public Setting<KeyBind> LureKey { get; } = new(new KeyBind((byte)KeyInterop.VirtualKeyFromKey(Key.D7), KBM.KeyboardModifiers.CTRL));
+        public Setting<int> BobberHue { get; } = new(0);
+        public Setting<int> BobberHueTolerance { get; } = new(15);
     }
 }

@@ -48,5 +48,11 @@
             <Setter Property="Foreground"
             Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
         </Style>
+        <Style x:Key="LeftLabelHead" TargetType="{x:Type Label}">
+            <Setter Property="Padding" Value="0 5 10 5"></Setter>
+            <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
+            <Setter Property="Foreground" Value="#BACEFF"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
     </Application.Resources>
 </Application>

@@ -38,6 +38,8 @@ namespace Angelo
         /// </summary>
         private void LoadSettings()
         {
+            BobberHueSlider.Value = _settings.BobberHue.Value;
+            BobberToleranceSlider.Value = _settings.BobberHueTolerance.Value;
             SensSlider.Value = _settings.Sensitivity.Value;
             ThresSlider.Value = _settings.Threshold.Value;
             LureCheckbox.IsChecked = _settings.UseLure.Value;
@@ -64,6 +66,17 @@ namespace Angelo
             LogBox.ScrollToEnd();
         }
 
+        private void BobberHueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (e.OldValue != 0)
+                _settings.BobberHue.Value = (int)BobberHueSlider.Value;
+        }
+
+        private void BobberToleranceSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (e.OldValue != 0)
+                _settings.BobberHueTolerance.Value = (int)BobberToleranceSlider.Value;
+        }
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)

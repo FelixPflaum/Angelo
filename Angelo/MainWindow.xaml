@@ -12,6 +12,7 @@
         Topmost="True"
         Style="{StaticResource DefaultStyle}">
     <StackPanel Margin="15 10">
+        <Label Style="{StaticResource LeftLabelHead}">Bobber Settings</Label>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -21,7 +22,25 @@
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
-                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource LeftLabel}">Hue</Label>
+            <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Name="BobberHueSlider" ValueChanged="BobberHueSlider_ValueChanged"></Slider>
+            <Label Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=BobberHueSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
+
+            <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftLabel}">Tolerance</Label>
+            <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Minimum="5" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True" Name="BobberToleranceSlider" ValueChanged="BobberToleranceSlider_ValueChanged"></Slider>
+            <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=BobberToleranceSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
+        </Grid>
+        
+        <Label Style="{StaticResource LeftLabelHead}">Splash Settings</Label>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
@@ -33,12 +52,25 @@
             <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftLabel}">Threshold</Label>
             <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Minimum="10" Maximum="500" TickFrequency="5" IsSnapToTickEnabled="True" Name="ThresSlider" ValueChanged="ThresSlider_ValueChanged"></Slider>
             <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=ThresSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
+        </Grid>
 
-            <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=FishingKeyInput}">Fishing Key</Label>
-            <TextBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="FishingKeyInput" KeyDown="FishingKeyInput_KeyDown" KeyUp="KeyInput_KeyUp" IsReadOnly="True"/>
+        <Label Style="{StaticResource LeftLabelHead}">Keys</Label>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
-            <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=LureKeyInput}">Lure Key</Label>
-            <StackPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=FishingKeyInput}">Fishing Key</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="FishingKeyInput" KeyDown="FishingKeyInput_KeyDown" KeyUp="KeyInput_KeyUp" IsReadOnly="True"/>
+
+            <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftLabel}" Target="{Binding ElementName=LureKeyInput}">Lure Key</Label>
+            <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <TextBox VerticalAlignment="Center" Width="100" TextAlignment="Center" HorizontalAlignment="Left" Name="LureKeyInput" KeyDown="LureKeyInput_KeyDown" KeyUp="KeyInput_KeyUp" IsReadOnly="True"/>
                 <Label VerticalAlignment="Center" Foreground="#FFE6E6E6" Padding="10 0 5 0" Target="{Binding ElementName=LureCheckbox}">Use Lure</Label>
                 <CheckBox Name="LureCheckbox" VerticalAlignment="Center" Click="LureCheckbox_Click"></CheckBox>
