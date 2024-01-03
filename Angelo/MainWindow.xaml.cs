@@ -30,7 +30,7 @@ namespace Angelo
         {
             base.OnClosed(e);
             _harbormaster.StopFishing();
-            DebugWindow.GetInstance().Close();
+            CallibrationWindow.GetInstance().Close();
         }
 
         /// <summary>
