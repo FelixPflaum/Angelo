@@ -1,4 +1,6 @@
-﻿namespace Angelo.Screen
+﻿using System;
+
+namespace Angelo.Screen
 {
     internal readonly struct PixelColor
     {
@@ -71,6 +73,38 @@
                 return false;
             else
                 return Value == ((PixelColor)obj).Value;
+        }
+
+        /// <summary>
+        /// Get hue value.
+        /// </summary>
+        /// <returns>The 0-360° hue value.</returns>
+        public int GetHue()
+        {
+            float r = (R / 255.0f);
+            float g = (G / 255.0f);
+            float b = (B / 255.0f);
+            float min = Math.Min(Math.Min(r, g), b);
+            float max = Math.Max(Math.Max(r, g), b);
+            float delta = max - min;
+            float hue = 0;
+
+            if (delta != 0)
+            {
+                if (r == max)
+                    hue = ((g - b) / 6) / delta;
+                else if (g == max)
+                    hue = (1.0f / 3) + ((b - r) / 6) / delta;
+                else
+                    hue = (2.0f / 3) + ((r - g) / 6) / delta;
+
+                if (hue < 0)
+                    hue += 1;
+                if (hue > 1)
+                    hue -= 1;
+            }
+
+            return (int)(hue * 360);
         }
     }
 }

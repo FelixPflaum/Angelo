@@ -1,5 +1,6 @@
 ﻿using Angelo.Settings;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using static Angelo.Bot.GameWindowHelpers;
@@ -155,7 +156,7 @@ namespace Angelo.Bot
             if (IsGameInForeground() && (!_screen.HaveAnchorPositions() || _screen.AreAnchorsVisible()))
                 return false;
 
-            Log("Waiting for game window to be in foreground and unobstructed...");
+            Log("Waiting for game to be in focus and visible...");
             while (true)
             {
                 SleepChecked(1000);
@@ -173,7 +174,7 @@ namespace Angelo.Bot
             if (!_mouse.UpdateUsageState())
                 return false;
 
-            Log("You moved the mouse, I'm waiting until you don't need it anymore...");
+            Log("You moved the mouse, waiting...");
             while (true)
             {
                 SleepChecked(500);
@@ -210,7 +211,7 @@ namespace Angelo.Bot
             Log("I'm in combat! Pretending to not exist...");
             while (true)
             {
-                SleepChecked(2000);
+                SleepChecked(5000);
                 if (!_screen.CheckDataPixel(DataColors.InCombat))
                     return true;
             }
@@ -242,21 +243,72 @@ namespace Angelo.Bot
             if (!_keyboard.SendFish())
                 return false;
 
-            SleepChecked(333);
+            SleepChecked(1500);
             return _screen.CheckDataPixel(DataColors.Casting);
         }
 
+        /// <summary>
+        /// Gets bobber positions and checks them.
+        /// </summary>
+        /// <returns>Our bobber position if it was found.</returns>
         private Point? FindBobber()
         {
+            List<FloodCountResult> positions;
+
+            CallibrationWindow cWin = CallibrationWindow.GetInstance();
+            if (cWin.ShouldShowBobber())
+            {
+                positions = _screen.FindBobberPositions(_settings.BobberPixels.Value, _settings.BobberHue.Value, _settings.BobberHueTolerance.Value, out Bitmap bmp);
+                cWin.SetBobberResult(bmp, positions, _screen.GetAnchorRegion());
+            }
+            else
+            {
+                positions = _screen.FindBobberPositions(_settings.BobberPixels.Value, _settings.BobberHue.Value, _settings.BobberHueTolerance.Value);
+            }
+
+            foreach (FloodCountResult pos in positions)
+            {
+                WaitForMouseAndGame();
+                _mouse.MoveTo(pos.BoundingBox.Right, pos.Center.Y);
+                SleepChecked(100);
+                if (_screen.CheckDataPixel(DataColors.TooltipShown))
+                    return new Point(pos.BoundingBox.Right, pos.Center.Y);
+            }
+
             return null;
         }
 
         private bool WaitAndCatch(Point bobberPos)
         {
+            CallibrationWindow cWin = CallibrationWindow.GetInstance();
+            bool shouldShowCW = cWin.ShouldShowSplash();
+            int maxCount = 0;
 
-            // WaitForMouseAndGame(); before click to loot
+            while (true)
+            {
+                if (!_screen.CheckDataPixel(DataColors.Casting))
+                    return false;
 
-            return false;
+                int threshold = _settings.Threshold.Value;
+                int count = _screen.CountAreaPixelsAbove(bobberPos.X, bobberPos.Y, 100, (byte)threshold);
+
+                if (count > maxCount)
+                    maxCount = count;
+
+                if (shouldShowCW)
+                    cWin.SetSplashResult(count, _settings.Sensitivity.Value, maxCount);
+
+                if (count >= _settings.Sensitivity.Value)
+                {
+                    Log("Splash detected, clicking!");
+                    SleepChecked(250, 1000);
+                    _mouse.MoveTo(bobberPos);
+                    _mouse.Click(true, 55);
+                    return true;
+                }
+
+                SleepChecked(1000 / 30);
+            }
         }
 
         /// <summary>

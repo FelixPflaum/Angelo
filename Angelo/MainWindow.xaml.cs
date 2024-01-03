@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Angelo.Keybinds;
+using Angelo.Settings;
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using Angelo.Keybinds;
-using Angelo.Settings;
 
 namespace Angelo
 {
@@ -40,6 +40,7 @@ namespace Angelo
         {
             BobberHueSlider.Value = _settings.BobberHue.Value;
             BobberToleranceSlider.Value = _settings.BobberHueTolerance.Value;
+            BobberPixelsSlider.Value = _settings.BobberPixels.Value;
             SensSlider.Value = _settings.Sensitivity.Value;
             ThresSlider.Value = _settings.Threshold.Value;
             LureCheckbox.IsChecked = _settings.UseLure.Value;
@@ -77,6 +78,13 @@ namespace Angelo
             if (e.OldValue != 0)
                 _settings.BobberHueTolerance.Value = (int)BobberToleranceSlider.Value;
         }
+
+        private void BobberPixelsSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (e.OldValue != 0)
+                _settings.BobberPixels.Value = (int)BobberPixelsSlider.Value;
+        }
+
         private void SensSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.OldValue != 0)
@@ -141,9 +149,9 @@ namespace Angelo
 
         private void DBGButton_Click(object sender, RoutedEventArgs e)
         {
-            DebugWindow debgWindow = DebugWindow.GetInstance();
-            debgWindow.Show();
-            debgWindow.Focus();
+            CallibrationWindow cWin = CallibrationWindow.GetInstance();
+            cWin.Show();
+            cWin.Focus();
         }
     }
 }

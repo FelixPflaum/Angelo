@@ -29,9 +29,14 @@ namespace Angelo.Screen
         /// </summary>
         public void Update()
         {
-            _bmp.UnlockBits(_bmpd);
-            _gfx.CopyFromScreen(0, 0, 0, 0, new Size(Screen.Width, Screen.Height), CopyPixelOperation.SourceCopy);
-            _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, PIXELFORMART);
+            Update(0, 0, _bmp.Width, _bmp.Height);
+        }
+
+        /// <param name="region">The region to update.</param>
+        /// <inheritdoc cref="Update(int, int, int, int)"/>
+        public void Update(Rectangle region)
+        {
+            Update(region.X, region.Y, region.Width, region.Height);
         }
 
         /// <summary>
@@ -58,6 +63,16 @@ namespace Angelo.Screen
             _gfx.CopyFromScreen(xStart, yStart, xStart, yStart, new Size(width, height), CopyPixelOperation.SourceCopy);
             // Not reducing dimensions here doesn't seem to impact performance in any meaningful way.
             // Leave dimensions constant to make things easier.
+            _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PIXELFORMART);
+        }
+
+        /// <summary>
+        /// Fill entire working image with 0x000000.
+        /// </summary>
+        public void Clear()
+        {
+            _bmp.UnlockBits(_bmpd);
+            _gfx.Clear(Color.FromArgb(0, 0, 0));
             _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PIXELFORMART);
         }
 
@@ -97,6 +112,14 @@ namespace Angelo.Screen
                 throw new ArgumentException("Resulting rectangle must fit within screen dimensions!");
             if (pixelRatio != 1 && pixelRatio % 2 != 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelRatio), "Ratio has to be divisible by 2!");
+
+            if (pixelRatio == 1)
+            {
+                _bmp.UnlockBits(_bmpd);
+                Bitmap bmpNew = _bmp.Clone(new Rectangle(xStart, yStart, width, height), PIXELFORMART);
+                _bmpd = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadOnly, PIXELFORMART);
+                return bmpNew;
+            }
 
             width /= pixelRatio;
             height /= pixelRatio;

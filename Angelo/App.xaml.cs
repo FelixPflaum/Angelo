@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using Angelo.Keybinds;
 using Angelo.Settings;
 
@@ -14,6 +15,12 @@ namespace Angelo
             SettingsManager.Load();
             MainWindow main = new();
             main.Show();
+
+#if DEBUG
+            DebugWindow debgWindow = DebugWindow.GetInstance();
+            debgWindow.Show();
+            debgWindow.Focus();
+#endif
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)

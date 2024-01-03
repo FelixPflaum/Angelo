@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Angelo"
         mc:Ignorable="d"
-        Title="DebugWindow" Height="450" Width="800">
+        Title="DebugWindow" Height="450" Width="800"
+        Loaded="Window_Loaded">
     <StackPanel>
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
             <Label>X</Label>
@@ -18,9 +19,9 @@
             <TextBox Name="DInput4" Width="150"></TextBox>
             <Button Name="DInputB1" Click="DInputB1_Click">Do Something</Button>
         </StackPanel>
-        <Border Margin="0 10" BorderThickness="1" BorderBrush="Black">
-            <Image Name="ImageDisplay" MinHeight="5" Stretch="None"></Image>
-        </Border>
         <TextBlock Name="DText1"></TextBlock>
+        <Border Margin="0 10" BorderThickness="1" BorderBrush="Black">
+            <Image Name="ImageDisplay" MinHeight="5" Stretch="None" MouseDown="ImageDisplay_MouseDown"></Image>
+        </Border>
     </StackPanel>
 </Window>

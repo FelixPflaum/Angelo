@@ -45,11 +45,17 @@ namespace Angelo.Bot
             GetCursorPos(out _lastPos);
         }
 
+        /// <inheritdoc cref="MoveTo(int, int)"/>
+        public void MoveTo(System.Drawing.Point pos)
+        {
+            MoveTo(pos.X, pos.Y);
+        }
+
         /// <summary>
         /// Just a convinience alias for <see cref="MouseClick(bool, int)"/>.
         /// </summary>
         /// <inheritdoc cref="MouseClick(bool, int)"/>
-        public static void Click(bool isRightClick, int releaseDelayMs)
+        public void Click(bool isRightClick, int releaseDelayMs)
         {
             MouseClick(isRightClick, releaseDelayMs);
         }

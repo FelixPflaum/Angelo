@@ -1,16 +1,18 @@
 ﻿using Angelo.Screen;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Angelo.Bot
 {
     internal class ScreenHandler
     {
-        private static readonly Point DATA_PX_OFFSET = new(3, 3);
+        private static readonly Point DATA_PX_OFFSET = new(5, 5);
         private static readonly PixelColor[] ANCHOR_COLORS = { new(0xFF0000), new(0x00FF00), new(0x0000FF), new(0xFFFFFF) };
 
         private readonly CaptureScreen _capture;
         private readonly Point[] _anchorPositions;
+        private Rectangle _anchorRegion;
 
         private bool _haveAnchors = false;
 
@@ -18,6 +20,7 @@ namespace Angelo.Bot
         {
             _capture = new CaptureScreen();
             _anchorPositions = new Point[4];
+            _anchorRegion = new Rectangle();
         }
 
         /// <summary>
@@ -32,15 +35,16 @@ namespace Angelo.Bot
             if (!_haveAnchors)
                 throw new InvalidOperationException("CheckDataPixel can't be called before anchors are set!");
 
+            int dpxoffset = (int)((uint)colors & 0xFF000000) >> 24;
             Point a0 = _anchorPositions[0];
-            int dataX = a0.X + DATA_PX_OFFSET.X;
+            int dataX = a0.X + DATA_PX_OFFSET.X * (1 + dpxoffset);
             int dataY = a0.Y + DATA_PX_OFFSET.Y;
 
             if (!noUpdate)
                 _capture.Update(dataX, dataY, 1, 1);
 
             PixelColor pixel = _capture.GetPixel(dataX, dataY);
-            return pixel.Contains((int)colors);
+            return pixel.Contains((int)colors & 0xFFFFFF);
         }
 
         /// <summary>
@@ -62,12 +66,7 @@ namespace Angelo.Bot
             if (!_haveAnchors)
                 throw new InvalidOperationException("AreAnchorsVisible can't be called before anchors are set!");
 
-            int xStart = _anchorPositions[0].X;
-            int yStart = _anchorPositions[0].Y;
-            int width = _anchorPositions[3].X - xStart;
-            int height = _anchorPositions[3].Y - yStart;
-
-            _capture.Update(xStart, yStart, width, height);
+            _capture.Update(_anchorRegion.X, _anchorRegion.Y, _anchorRegion.Width, _anchorRegion.Height);
 
             foreach (Point a in _anchorPositions)
             {
@@ -139,7 +138,16 @@ namespace Angelo.Bot
                 nextAnchor++;
             }
 
-            _haveAnchors = nextAnchor == _anchorPositions.Length;
+            if (nextAnchor == _anchorPositions.Length)
+            {
+                _anchorRegion.X = _anchorPositions[0].X;
+                _anchorRegion.Y = _anchorPositions[0].Y;
+                _anchorRegion.Width = _anchorPositions[3].X - _anchorPositions[0].X;
+                _anchorRegion.Height = _anchorPositions[3].Y - _anchorPositions[0].Y;
+
+                _haveAnchors = true;
+            }
+
             return _haveAnchors;
         }
 
@@ -179,6 +187,92 @@ namespace Angelo.Bot
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Get the region defined by the found anchor points.
+        /// </summary>
+        /// <returns>A <see cref="Rectangle"/> of the region.</returns>
+        public Rectangle GetAnchorRegion()
+        {
+            return new Rectangle(_anchorRegion.X, _anchorRegion.Y, _anchorRegion.Width, _anchorRegion.Height);
+        }
+
+        /// <summary>
+        /// Find possible bobber positions by finding areas of pixels with similar color.
+        /// </summary>
+        /// <param name="minConnected">Minimum number of connected pixels to qualify an area.</param>
+        /// <param name="hue">The target hue.</param>
+        /// <param name="hueTolerance">Tolerance to target hue.</param>
+        /// <param name="getBitmap">If set will paint found areas white. Has to have the same dimensions as the screen! This costs performance!</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">If anchors are not yet set.</exception>
+        private List<FloodCountResult> FindBobberPriv(int minConnected, int hue, int hueTolerance, Bitmap? getBitmap)
+        {
+            // Don't scan more lines after we have this many possible areas already.
+            const int sanityCheckAmount = 10;
+
+            if (!_haveAnchors)
+                throw new InvalidOperationException("FindBobberPositions can't be called before anchors are set!");
+
+            int xStart = _anchorRegion.X;
+            int yStart = _anchorRegion.Y;
+            int width = _anchorRegion.Width;
+            int height = _anchorRegion.Height;
+            int xEnd = xStart + width;
+            int yEnd = yStart + height;
+
+            FloodCountHue fch = new(_capture, hue, hueTolerance);
+            List<FloodCountResult> foundAreas = new();
+
+            for (int y = yStart; y < yEnd; y++)
+            {
+                if (foundAreas.Count > sanityCheckAmount)
+                    break;
+
+                for (int x = xStart; x < xEnd; x++)
+                {
+                    PixelColor pixel = _capture.GetPixel(x, y);
+                    if (!fch.IsPixelInHueRange(pixel))
+                        continue;
+
+                    bool isInExistingArea = false;
+                    foreach (FloodCountResult area in foundAreas)
+                    {
+                        if (area.BoundingBox.Contains(x, y))
+                        {
+                            x = area.BoundingBox.Right;
+                            isInExistingArea = true;
+                            break;
+                        }
+                    }
+                    if (isInExistingArea)
+                        continue;
+
+                    FloodCountResult res = fch.CountFrom(x, y, getBitmap);
+                    if (res.ConnectedPixels >= minConnected)
+                        foundAreas.Add(res);
+
+                    x += res.BoundingBox.Width;
+                }
+            }
+
+            return foundAreas;
+        }
+
+        /// <inheritdoc cref="FindBobberPriv(int, int, int, Bitmap?)"/>
+        public List<FloodCountResult> FindBobberPositions(int minConnected, int hue, int hueTolerance)
+        {
+            _capture.Update(_anchorRegion);
+            return FindBobberPriv(minConnected, hue, hueTolerance, null);
+        }
+
+        /// <inheritdoc cref="FindBobberPriv(int, int, int, Bitmap?)"/>
+        public List<FloodCountResult> FindBobberPositions(int minConnected, int hue, int hueTolerance, out Bitmap bmp)
+        {
+            _capture.Update(_anchorRegion);
+            bmp = _capture.GetBitmapFromBuffer();
+            return FindBobberPriv(minConnected, hue, hueTolerance, bmp);
         }
     }
 }
