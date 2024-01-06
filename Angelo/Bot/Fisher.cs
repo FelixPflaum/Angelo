@@ -236,6 +236,7 @@ namespace Angelo.Bot
 
         /// <summary>
         /// Attempt to cast fishing. Tries to send keys and checks if cast starts.
+        /// Also waits some time so bobber can be considered fully visible once this functions returns.
         /// </summary>
         /// <returns>true if cast was started, false otherwise.</returns>
         private bool CastFishing()
@@ -243,7 +244,7 @@ namespace Angelo.Bot
             if (!_keyboard.SendFish())
                 return false;
 
-            SleepChecked(1500);
+            SleepChecked(2500);
             return _screen.CheckDataPixel(DataColors.Casting);
         }
 
@@ -306,11 +307,11 @@ namespace Angelo.Bot
 
                 if (count >= _settings.Sensitivity.Value)
                 {
-                    WaitForMouseAndGame();
                     Log("Splash detected, clicking!");
-                    SleepChecked(250, 1000);
+                    if (!WaitForMouseAndGame())
+                        SleepChecked(250, 1500);
                     _mouse.MoveTo(bobberPos);
-                    _mouse.Click(true, 55);
+                    _mouse.Click(true, _rnd.Next(50, 150));
                     return true;
                 }
 
