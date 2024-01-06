@@ -55,7 +55,7 @@
             <Label Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=ThresSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
 
             <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftLabel}">Sensitivity</Label>
-            <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Minimum="100" Maximum="500" TickFrequency="1" IsSnapToTickEnabled="True" Name="SensSlider" ValueChanged="SensSlider_ValueChanged"></Slider>
+            <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Minimum="25" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True" Name="SensSlider" ValueChanged="SensSlider_ValueChanged"></Slider>
             <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=SensSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
         </Grid>
 
