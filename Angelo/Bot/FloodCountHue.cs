@@ -8,16 +8,48 @@ namespace Angelo.Bot
     internal readonly struct FloodCountResult
     {
         public readonly int ConnectedPixels;
-        public readonly Rectangle BoundingBox;
-        public readonly Point Center;
+        public readonly int X;
+        public readonly int Y;
+        public readonly int Width;
+        public readonly int Height;
 
         public FloodCountResult(int count, int xLeft, int xRight, int yTop, int yBottom)
         {
             ConnectedPixels = count;
-            BoundingBox = new Rectangle(xLeft, yTop, xRight - xLeft, yBottom - yTop);
-            Center = new Point(xLeft, yTop);
-            Center.Offset(BoundingBox.Width / 2, BoundingBox.Height / 2);
+            X = xLeft;
+            Y = yTop;
+            Width = xRight - xLeft;
+            Height = yBottom - yTop;
         }
+
+        /// <summary>
+        /// Get the center point.
+        /// </summary>
+        public readonly Point Center
+        {
+            get
+            {
+                Point c = new(X, Y);
+                c.Offset(Width / 2, Height / 2);
+                return c;
+            }
+        }
+
+        /// <summary>
+        /// The x-coordinate of the right most pixel in this result.
+        /// </summary>
+        public readonly int Right
+        {
+            get => X + Width;
+        }
+
+        /// <summary>
+        /// Check if coordinate is inside the bounding box of this results area.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public readonly bool Contains(int x, int y) => X <= x && x < X + Width && Y <= y && y < Y + Height;
     }
 
     /// <summary>

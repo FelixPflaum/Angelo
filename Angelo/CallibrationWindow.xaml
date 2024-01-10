@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Angelo"
         mc:Ignorable="d"
-        Title="CallibrationWindow"
+        Title="Callibration"
         SizeToContent="WidthAndHeight"
         MinWidth="350"
         ResizeMode="NoResize"
@@ -22,6 +22,6 @@
             <TextBlock Margin="15 0">|</TextBlock>
             <TextBlock Name="InfoText"></TextBlock>
         </StackPanel>
-        <Image Name="ImageDisplay" Stretch="None"></Image>
+        <Image Name="ImageDisplay" Stretch="None" MouseDown="ImageDisplay_MouseDown"></Image>
     </StackPanel>
 </Window>

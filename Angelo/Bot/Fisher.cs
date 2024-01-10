@@ -7,9 +7,6 @@ using static Angelo.Bot.GameWindowHelpers;
 
 namespace Angelo.Bot
 {
-    internal delegate void LogCallback(string message);
-    internal delegate void ExitCallback();
-
     internal class Fisher
     {
         private readonly MouseHandler _mouse;
@@ -17,18 +14,11 @@ namespace Angelo.Bot
         private readonly KeyboardHandler _keyboard;
         private readonly SettingsData _settings;
         private readonly Random _rnd;
-
-        private readonly LogCallback _logCallback;
-        private readonly ExitCallback _exitCallback;
-
         private readonly Object _stopLock = new();
         private bool _shouldStop;
 
-        public Fisher(LogCallback lcb, ExitCallback ecb)
+        public Fisher()
         {
-            _logCallback = lcb;
-            _exitCallback = ecb;
-
             _mouse = new MouseHandler();
             _screen = new ScreenHandler();
             _keyboard = new KeyboardHandler();
@@ -37,13 +27,35 @@ namespace Angelo.Bot
             _shouldStop = false;
         }
 
+        public delegate void LogCallback(string message);
+        public delegate void ExitCallback();
         /// <summary>
-        /// Write line to log.
+        /// Fires periodically while splash is being looked for.
         /// </summary>
-        /// <param name="message"></param>
-        private void Log(string message)
+        /// <param name="pixelsFound">The pixel found this frame.</param>
+        /// <param name="threshold">Amount of pixels needed to qualify as detected.</param>
+        /// <param name="maxFound">Maximum pixels found this cast.</param>
+        public delegate void SplashDetectionUpdate(int pixelsFound, int threshold, int maxFound);
+        /// <summary>
+        /// Fires when bobber detection ended.
+        /// </summary>
+        /// <param name="bmp">The image used to detect bobbers.</param>
+        /// <param name="checkRegion">The region that was checked.</param>
+        /// <param name="positions">List of found potential positions.</param>
+        public delegate void BobberDetectionEvent(Bitmap bmp, Rectangle checkRegion, List<FloodCountResult> positions);
+
+        public event ExitCallback? ExitEvent;
+        public event LogCallback? LogEvent;
+        public event SplashDetectionUpdate? SplashEvent;
+        public event BobberDetectionEvent? BobberEvent;
+
+        /// <summary>
+        /// Fire a log event.
+        /// </summary>
+        /// <param name="msg"></param>
+        private void Log(string msg)
         {
-            _logCallback(message);
+            LogEvent?.Invoke(msg);
         }
 
         /// <summary>
@@ -83,7 +95,7 @@ namespace Angelo.Bot
             }
             finally
             {
-                _exitCallback();
+                ExitEvent?.Invoke();
             }
         }
 
@@ -256,24 +268,16 @@ namespace Angelo.Bot
         {
             List<FloodCountResult> positions;
 
-            CallibrationWindow cWin = CallibrationWindow.GetInstance();
-            if (cWin.ShouldShowBobber())
-            {
-                positions = _screen.FindBobberPositions(_settings.BobberPixels.Value, _settings.BobberHue.Value, _settings.BobberHueTolerance.Value, out Bitmap bmp);
-                cWin.SetBobberResult(bmp, positions, _screen.GetAnchorRegion());
-            }
-            else
-            {
-                positions = _screen.FindBobberPositions(_settings.BobberPixels.Value, _settings.BobberHue.Value, _settings.BobberHueTolerance.Value);
-            }
+            positions = _screen.FindBobberPositions(_settings.BobberPixels.Value, _settings.BobberHue.Value, _settings.BobberHueTolerance.Value);
+            BobberEvent?.Invoke(_screen.GetAnchorRegionImg(), _screen.GetAnchorRegion(), positions);
 
             foreach (FloodCountResult pos in positions)
             {
                 WaitForMouseAndGame();
-                _mouse.MoveTo(pos.BoundingBox.Right, pos.Center.Y);
+                _mouse.MoveTo(pos.Right, pos.Center.Y);
                 SleepChecked(100);
                 if (_screen.CheckDataPixel(DataColors.TooltipShown))
-                    return new Point(pos.BoundingBox.Right, pos.Center.Y);
+                    return new Point(pos.Right, pos.Center.Y);
             }
 
             return null;
@@ -287,8 +291,6 @@ namespace Angelo.Bot
         /// <returns></returns>
         private bool WaitAndCatch(Point bobberPos)
         {
-            CallibrationWindow cWin = CallibrationWindow.GetInstance();
-            bool shouldShowCW = cWin.ShouldShowSplash();
             int maxCount = 0;
 
             while (true)
@@ -297,15 +299,15 @@ namespace Angelo.Bot
                     return false;
 
                 int threshold = _settings.Threshold.Value;
+                int sensitivity = _settings.Sensitivity.Value;
                 int count = _screen.CountAreaPixelsAbove(bobberPos.X, bobberPos.Y, 100, (byte)threshold);
 
                 if (count > maxCount)
                     maxCount = count;
 
-                if (shouldShowCW)
-                    cWin.SetSplashResult(count, _settings.Sensitivity.Value, maxCount);
+                SplashEvent?.Invoke(count, sensitivity, maxCount);
 
-                if (count >= _settings.Sensitivity.Value)
+                if (count >= sensitivity)
                 {
                     Log("Splash detected, clicking!");
                     if (!WaitForMouseAndGame())

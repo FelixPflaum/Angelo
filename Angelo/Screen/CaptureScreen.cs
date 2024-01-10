@@ -154,6 +154,13 @@ namespace Angelo.Screen
             return GetBitmapFromBuffer(0, 0, Screen.Width, Screen.Height, pixelRatio);
         }
 
+        /// <param name="region">The region of the image to get.</param>
+        /// <inheritdoc cref="GetBitmapFromBuffer(int, int, int, int, int)"/>
+        public Bitmap GetBitmapFromBuffer(Rectangle region, int pixelRatio = 1)
+        {
+            return GetBitmapFromBuffer(region.X, region.Y, region.Width, region.Height, pixelRatio);
+        }
+
         /// <summary>
         /// Get the color of a pixel.
         /// </summary>

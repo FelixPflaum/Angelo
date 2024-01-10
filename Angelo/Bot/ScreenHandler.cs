@@ -199,6 +199,15 @@ namespace Angelo.Bot
         }
 
         /// <summary>
+        /// Get currently buffered image of anchor region.
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap GetAnchorRegionImg()
+        {
+            return _capture.GetBitmapFromBuffer(_anchorRegion);
+        }
+
+        /// <summary>
         /// Find possible bobber positions by finding areas of pixels with similar color.
         /// </summary>
         /// <param name="minConnected">Minimum number of connected pixels to qualify an area.</param>
@@ -239,9 +248,9 @@ namespace Angelo.Bot
                     bool isInExistingArea = false;
                     foreach (FloodCountResult area in foundAreas)
                     {
-                        if (area.BoundingBox.Contains(x, y))
+                        if (area.Contains(x, y))
                         {
-                            x = area.BoundingBox.Right;
+                            x = area.Right;
                             isInExistingArea = true;
                             break;
                         }
@@ -253,7 +262,7 @@ namespace Angelo.Bot
                     if (res.ConnectedPixels >= minConnected)
                         foundAreas.Add(res);
 
-                    x += res.BoundingBox.Width;
+                    x += res.Width;
                 }
             }
 

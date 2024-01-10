@@ -30,7 +30,7 @@ namespace Angelo
         {
             base.OnClosed(e);
             _harbormaster.StopFishing();
-            CallibrationWindow.GetInstance().Close();
+            CallibrationWindow.Current?.Close();
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Angelo
 
         private void DBGButton_Click(object sender, RoutedEventArgs e)
         {
-            CallibrationWindow cWin = CallibrationWindow.GetInstance();
+            CallibrationWindow cWin = CallibrationWindow.GetInstance(_harbormaster);
             cWin.Show();
             cWin.Focus();
         }

@@ -1,8 +1,9 @@
 ﻿using Angelo.Bot;
+using Angelo.Screen;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -13,64 +14,45 @@ namespace Angelo
     /// </summary>
     public partial class CallibrationWindow : Window
     {
-        private static CallibrationWindow? _instance;
+        public static CallibrationWindow? Current { get; private set; } = null;
         private static readonly object _lock = new();
 
-        private CallibrationWindow()
+        private readonly Harbormaster _harbormaster;
+        private Bitmap? _currentBobberBmp;
+        private Rectangle? _currentBobberRegion;
+
+        private CallibrationWindow(Harbormaster harbormaster)
         {
             InitializeComponent();
+            _harbormaster = harbormaster;
+            _harbormaster.RegisterEvent(Harbormaster_SplashEvent);
+            _harbormaster.RegisterEvent(Harbormaster_BobberEvent);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _harbormaster.UnregisterEvent(Harbormaster_SplashEvent);
+            _harbormaster.UnregisterEvent(Harbormaster_BobberEvent);
         }
 
         /// <summary>
         /// Get singular instance, creating it if needed. This will always run on the UI thread.
         /// </summary>
         /// <returns></returns>
-        public static CallibrationWindow GetInstance()
+        internal static CallibrationWindow GetInstance(Harbormaster harbormaster)
         {
-            if (Application.Current.Dispatcher.Thread != Thread.CurrentThread)
-            {
-                return Application.Current.Dispatcher.Invoke(() => GetInstance());
-            }
-
-            if (_instance == null || !_instance.IsLoaded)
+            if (Current == null || !Current.IsLoaded)
             {
                 lock (_lock)
                 {
-                    if (_instance == null || !_instance.IsLoaded)
+                    if (Current == null || !Current.IsLoaded)
                     {
-                        _instance = new CallibrationWindow();
+                        Current = new CallibrationWindow(harbormaster);
                     }
                 }
             }
-            return _instance;
-        }
-
-        /// <summary>
-        /// Check if window is active and bobber checkbox is set.
-        /// Always runs on UI thread.
-        /// </summary>
-        /// <returns></returns>
-        public bool ShouldShowBobber()
-        {
-            if (Dispatcher.Thread != Thread.CurrentThread)
-            {
-                return Dispatcher.Invoke(() => ShouldShowBobber());
-            }
-            return IsVisible && ShowBobber.IsChecked == true;
-        }
-
-        /// <summary>
-        /// Check if window is active and splash checkbox is set.
-        /// Always runs on UI thread.
-        /// </summary>
-        /// <returns></returns>
-        public bool ShouldShowSplash()
-        {
-            if (Dispatcher.Thread != Thread.CurrentThread)
-            {
-                return Dispatcher.Invoke(() => ShouldShowSplash());
-            }
-            return IsVisible && ShowSplash.IsChecked == true;
+            return Current;
         }
 
         private void SetInfoText(string text)
@@ -97,48 +79,53 @@ namespace Angelo
             ImageDisplay.Source = bmpimg;
         }
 
-        /// <summary>
-        /// Display or update splash scan.
-        /// </summary>
-        /// <param name="bmp"></param>
-        /// <param name="areas"></param>
-        internal void SetBobberResult(Bitmap bmp, List<FloodCountResult> areas, Rectangle displayRegion)
+        private void ImageDisplay_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (Dispatcher.Thread != Thread.CurrentThread)
-            {
-                Dispatcher.Invoke(() => SetBobberResult(bmp, areas, displayRegion));
+            if (_currentBobberBmp == null || _currentBobberRegion == null)
                 return;
-            }
 
-            foreach (var area in areas)
-            {
-                Graphics g = Graphics.FromImage(bmp);
-                var c = area.Center;
-                Pen pen = new(Color.Red, 2);
-                g.DrawLine(pen, c.X - 6, c.Y, c.X + 6, c.Y);
-                g.DrawLine(pen, c.X, c.Y - 6, c.X, c.Y + 6);
-                g.DrawRectangle(pen, area.BoundingBox);
-                g.DrawString(area.ConnectedPixels.ToString(), new Font("Arial", 16.0f), Brushes.Green, new PointF((float)area.BoundingBox.Right + 5, area.BoundingBox.Top));
-            }
+            var cs = new CaptureScreen();
+            var mousePos = e.GetPosition(ImageDisplay);
+            int x = (int)mousePos.X;
+            int y = (int)mousePos.Y;
 
-            SetImage(bmp.Clone(displayRegion, bmp.PixelFormat));
-            SetInfoText($"Found possible bobbers: {areas.Count}");
+            cs.SetBitmap(_currentBobberBmp, 0, 0);
+            PixelColor pc = new(_currentBobberBmp.GetPixel(x, y).ToArgb());
+            SetInfoText($"Hue at mouse position: {pc.GetHue()}");
         }
 
-        /// <summary>
-        /// Display result for bobber search.
-        /// </summary>
-        /// <param name="pixelCount"></param>
-        /// <param name="needed"></param>
-        /// <param name="max"></param>
-        public void SetSplashResult(int pixelCount, int needed, int max)
+        private void Harbormaster_BobberEvent(Bitmap orig, Rectangle checkRegion, List<FloodCountResult> positions)
         {
-            if (Dispatcher.Thread != Thread.CurrentThread)
+            _currentBobberBmp = orig;
+            _currentBobberRegion = checkRegion;
+
+            Bitmap copy = orig.Clone(new Rectangle(0, 0, orig.Width, orig.Height), orig.PixelFormat);
+            Graphics gfx = Graphics.FromImage(copy);
+            Pen pen = new(Color.Red, 2);
+
+            foreach (var area in positions)
             {
-                Dispatcher.Invoke(() => SetSplashResult(pixelCount, needed, max));
-                return;
+                // Offset x and y coordinates so they are relative to region instead of screen.
+                var centerPoint = area.Center;
+                var bBox = new Rectangle(area.X, area.Y, area.Width, area.Height);
+                centerPoint.Offset(-checkRegion.X, -checkRegion.Y);
+                bBox.Offset(-checkRegion.X, -checkRegion.Y);
+
+                gfx.DrawLine(pen, centerPoint.X - 6, centerPoint.Y, centerPoint.X + 6, centerPoint.Y);
+                gfx.DrawLine(pen, centerPoint.X, centerPoint.Y - 6, centerPoint.X, centerPoint.Y + 6);
+                gfx.DrawRectangle(pen, bBox);
+                gfx.DrawString(area.ConnectedPixels.ToString(), new Font("Arial", 16.0f), Brushes.Green, new PointF((float)bBox.Right + 5, bBox.Top));
             }
-            SetInfoText($"Status: {pixelCount} / {needed} ({pixelCount / needed * 100}%) - Max: {max} ({max / needed * 100}%)");
+
+            SetImage(copy);
+            SetInfoText($"Found possible bobbers: {positions.Count}");
+        }
+
+        private void Harbormaster_SplashEvent(int pixelsFound, int threshold, int maxFound)
+        {
+            double pctCurrent = Math.Round((double)pixelsFound / threshold * 100);
+            double pctMax = Math.Round((double)maxFound / threshold * 100);
+            SetInfoText($"Splash detection: {pixelsFound} / {threshold} ({pctCurrent}%) - Max: {maxFound} ({pctMax}%)");
         }
     }
 }
