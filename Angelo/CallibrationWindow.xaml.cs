@@ -1,11 +1,10 @@
-﻿using Angelo.Bot;
+﻿using Angelo.Bot.Bobber;
 using Angelo.Screen;
+using Angelo.UI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Windows;
-using System.Windows.Media.Imaging;
 
 namespace Angelo
 {
@@ -18,15 +17,17 @@ namespace Angelo
         private static readonly object _lock = new();
 
         private readonly Harbormaster _harbormaster;
-        private Bitmap? _currentBobberBmp;
-        private Rectangle? _currentBobberRegion;
+        private readonly BobberDetectionImg _hueSelImg;
+
 
         private CallibrationWindow(Harbormaster harbormaster)
         {
             InitializeComponent();
             _harbormaster = harbormaster;
             _harbormaster.RegisterEvent(Harbormaster_SplashEvent);
-            _harbormaster.RegisterEvent(Harbormaster_BobberEvent);
+            _hueSelImg = new BobberDetectionImg();
+            _hueSelImg.PixelSelect += HueSelImg_PixelSelect;
+            BobberHelperPanel.Children.Add(_hueSelImg.Image);
         }
 
         protected override void OnClosed(EventArgs e)
@@ -37,7 +38,7 @@ namespace Angelo
         }
 
         /// <summary>
-        /// Get singular instance, creating it if needed. This will always run on the UI thread.
+        /// Get singular instance, creating it if needed.
         /// </summary>
         /// <returns></returns>
         internal static CallibrationWindow GetInstance(Harbormaster harbormaster)
@@ -55,77 +56,49 @@ namespace Angelo
             return Current;
         }
 
-        private void SetInfoText(string text)
+        private void ShowBobber_Click(object sender, RoutedEventArgs e)
         {
-            InfoText.Text = text.Trim();
-        }
-
-        private void SetImage(Bitmap? bmp)
-        {
-            if (bmp == null)
+            if (ShowBobber.IsChecked == true)
             {
-                ImageDisplay.Source = null;
-                return;
+                _harbormaster.RegisterEvent(Harbormaster_BobberEvent);
+                BobberHelperPanel.Visibility = Visibility.Visible;
             }
-
-            MemoryStream mstream = new MemoryStream();
-            bmp.Save(mstream, System.Drawing.Imaging.ImageFormat.Bmp);
-            BitmapImage bmpimg = new();
-            bmpimg.BeginInit();
-            mstream.Seek(0, SeekOrigin.Begin);
-            bmpimg.StreamSource = mstream;
-            bmpimg.EndInit();
-
-            ImageDisplay.Source = bmpimg;
+            else
+            {
+                _harbormaster.UnregisterEvent(Harbormaster_BobberEvent);
+                BobberHelperPanel.Visibility = Visibility.Hidden;
+            }
         }
 
-        private void ImageDisplay_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void HueSelImg_PixelSelect(int lastPixelHue, int avgHue, int minHue, int maxHue, int selectionCount)
         {
-            if (_currentBobberBmp == null || _currentBobberRegion == null)
-                return;
-
-            var cs = new CaptureScreen();
-            var mousePos = e.GetPosition(ImageDisplay);
-            int x = (int)mousePos.X;
-            int y = (int)mousePos.Y;
-
-            cs.SetBitmap(_currentBobberBmp, 0, 0);
-            PixelColor pc = new(_currentBobberBmp.GetPixel(x, y).ToArgb());
-            SetInfoText($"Hue at mouse position: {pc.GetHue()}");
+            BobberInfoText.Text = $"Hue at mouse position: {lastPixelHue} | Selection hue (min, max, avg): {minHue},{maxHue},{avgHue} (Over {selectionCount} pixels)";
         }
 
         private void Harbormaster_BobberEvent(Bitmap orig, Rectangle checkRegion, List<FloodCountResult> positions)
         {
-            _currentBobberBmp = orig;
-            _currentBobberRegion = checkRegion;
-
-            Bitmap copy = orig.Clone(new Rectangle(0, 0, orig.Width, orig.Height), orig.PixelFormat);
-            Graphics gfx = Graphics.FromImage(copy);
-            Pen pen = new(Color.Red, 2);
-
-            foreach (var area in positions)
-            {
-                // Offset x and y coordinates so they are relative to region instead of screen.
-                var centerPoint = area.Center;
-                var bBox = new Rectangle(area.X, area.Y, area.Width, area.Height);
-                centerPoint.Offset(-checkRegion.X, -checkRegion.Y);
-                bBox.Offset(-checkRegion.X, -checkRegion.Y);
-
-                gfx.DrawLine(pen, centerPoint.X - 6, centerPoint.Y, centerPoint.X + 6, centerPoint.Y);
-                gfx.DrawLine(pen, centerPoint.X, centerPoint.Y - 6, centerPoint.X, centerPoint.Y + 6);
-                gfx.DrawRectangle(pen, bBox);
-                gfx.DrawString(area.ConnectedPixels.ToString(), new Font("Arial", 16.0f), Brushes.Green, new PointF((float)bBox.Right + 5, bBox.Top));
-            }
-
-            SetImage(copy);
-            SetInfoText($"Found possible bobbers: {positions.Count}");
+            _hueSelImg.SetImg(orig);
+            _hueSelImg.DrawBobberPositions(positions, checkRegion.Location);
+            BobberInfoText.Text = $"Found {positions.Count} possible bobber(s).";
         }
 
         private void Harbormaster_SplashEvent(int pixelsFound, int threshold, int maxFound)
         {
             double pctCurrent = Math.Round((double)pixelsFound / threshold * 100);
             double pctMax = Math.Round((double)maxFound / threshold * 100);
-            SetInfoText($"Splash detection: {pixelsFound} / {threshold} ({pctCurrent}%) - Max: {maxFound} ({pctMax}%)");
+            SplashStatusText.Text = $"{pixelsFound} / {threshold} ({pctCurrent}%) - Max: {maxFound} ({pctMax}%)";
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var cs = new CaptureScreen();
+            int w = 800;
+            int h = 400;
+            int x = (cs.Screen.Width - w) / 2;
+            int y = (cs.Screen.Height - h) / 2;
+            cs.Update(x, y, w, h);
+            Bitmap bmp = cs.GetBitmapFromBuffer(x, y, w, h);
+            _hueSelImg.SetImg(bmp);
         }
     }
 }

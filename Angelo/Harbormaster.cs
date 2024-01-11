@@ -1,4 +1,5 @@
 ﻿using Angelo.Bot;
+using Angelo.Bot.Bobber;
 using Angelo.UI;
 using System.Collections.Generic;
 using System.Drawing;

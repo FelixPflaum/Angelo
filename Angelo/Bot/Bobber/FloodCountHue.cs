@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Angelo.Screen;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Angelo.Screen;
+using System.Windows.Media.Imaging;
 
-namespace Angelo.Bot
+namespace Angelo.Bot.Bobber
 {
     internal readonly struct FloodCountResult
     {
@@ -36,11 +37,19 @@ namespace Angelo.Bot
         }
 
         /// <summary>
-        /// The x-coordinate of the right most pixel in this result.
+        /// The x-coordinate of the right edge of this result. (X + Width)
         /// </summary>
         public readonly int Right
         {
             get => X + Width;
+        }
+
+        /// <summary>
+        /// The y-coordinate of the bottom edge of this result. (Y + Height)
+        /// </summary>
+        public readonly int Bottom
+        {
+            get => Y + Height;
         }
 
         /// <summary>
@@ -57,23 +66,36 @@ namespace Angelo.Bot
     /// </summary>
     internal class FloodCountHue
     {
-        private readonly CaptureScreen _captureScreen;
+        private readonly CaptureScreen? _captureScreen;
+        private readonly WriteableBitmap? _writeableBitmap;
         private readonly int _width;
         private readonly int _height;
         private readonly int _minHue;
         private readonly int _maxHue;
         private bool[,] _confirmedPixels;
 
-        public FloodCountHue(CaptureScreen captureScreen, int hue, int hueTolerance)
+        private FloodCountHue(int hue, int hueTolerance)
         {
-            _captureScreen = captureScreen;
             _confirmedPixels = new bool[1, 1];
-            _width = captureScreen.Screen.Width;
-            _height = captureScreen.Screen.Height;
-
             hue = ClipHue(hue);
             _minHue = ClipHue(hue - hueTolerance);
             _maxHue = ClipHue(hue + hueTolerance);
+        }
+
+        public FloodCountHue(CaptureScreen captureScreen, int hue, int hueTolerance)
+            : this(hue, hueTolerance)
+        {
+            _captureScreen = captureScreen;
+            _width = captureScreen.Screen.Width;
+            _height = captureScreen.Screen.Height;
+        }
+
+        public FloodCountHue(WriteableBitmap writeableBitmap, int hue, int hueTolerance)
+            : this(hue, hueTolerance)
+        {
+            _writeableBitmap = writeableBitmap;
+            _width = _writeableBitmap.PixelWidth;
+            _height = _writeableBitmap.PixelHeight;
         }
 
         /// <summary>
@@ -94,12 +116,11 @@ namespace Angelo.Bot
         /// </summary>
         /// <param name="x">The start pixel x-coordinate.</param>
         /// <param name="y">The start pixel y-coordinate.</param>
-        /// <param name="debugMap">If not null will fill found pixel positions on the bitmap white.</param>
         /// <returns>The <see cref="FloodCountResult"/> object containing collected data.</returns>
-        public FloodCountResult CountFrom(int x, int y, Bitmap? debugMap = null)
+        public FloodCountResult CountFrom(int x, int y)
         {
             _confirmedPixels = new bool[_width, _height];
-            return CombinedScanAndFill(x, y, debugMap);
+            return CombinedScanAndFill(x, y);
         }
 
         /// <summary>
@@ -125,7 +146,45 @@ namespace Angelo.Bot
             if (_confirmedPixels[x, y])
                 return false;
 
-            return IsPixelInHueRange(_captureScreen.GetPixel(x, y));
+            if (_captureScreen != null)
+                return IsPixelInHueRange(_captureScreen.GetPixel(x, y));
+
+            if (_writeableBitmap != null)
+            {
+                unsafe
+                {
+                    byte* pBuffer = (byte*)_writeableBitmap.BackBuffer;
+                    int bpp = _writeableBitmap.BackBufferStride / _writeableBitmap.PixelWidth;
+                    int pxVal = *(int*)(pBuffer + y * _writeableBitmap.BackBufferStride + x * bpp);
+                    return IsPixelInHueRange(new PixelColor(pxVal));
+                }
+            }
+
+            throw new InvalidOperationException("Somehow neither _captureScreen nor _writeableBitmap was initialized!");
+        }
+
+        private void ConfirmPixel(int x, int y)
+        {
+            _confirmedPixels[x, y] = true;
+
+            if (_writeableBitmap != null)
+            {
+                unsafe
+                {
+                    try
+                    {
+                        _writeableBitmap.Lock();
+                        byte* pBuffer = (byte*)_writeableBitmap.BackBuffer;
+                        int bpp = _writeableBitmap.BackBufferStride / _writeableBitmap.PixelWidth;
+                        *(int*)(pBuffer + y * _writeableBitmap.BackBufferStride + x * bpp) = 0xFFFFFF;
+                        _writeableBitmap.AddDirtyRect(new System.Windows.Int32Rect(x, y, 1, 1));
+                    }
+                    finally
+                    {
+                        _writeableBitmap.Unlock();
+                    }
+                }
+            }
         }
 
         private readonly struct StackEntry
@@ -146,12 +205,8 @@ namespace Angelo.Bot
 
         // Implementation of https://en.wikipedia.org/wiki/Flood_fill#Span_filling combined-scan-and-fill
         // Modified to count found pixels and create a bounding box.
-        private FloodCountResult CombinedScanAndFill(int x, int y, Bitmap? debugMap)
+        private FloodCountResult CombinedScanAndFill(int x, int y)
         {
-            if (debugMap != null)
-                if (debugMap.Width != _width || debugMap.Height != _height)
-                    throw new ArgumentException("Bitmap must have same size as current working surface!", nameof(debugMap));
-
             if (!IsInRangeAndUnconfirmed(x, y))
                 throw new ArgumentException("Given start coordinates are not a valid pixel!");
 
@@ -165,7 +220,7 @@ namespace Angelo.Bot
             Stack<StackEntry> s = new();
 
             s.Push(new StackEntry(x, x, y, 1));
-            s.Push(new StackEntry(x, x, y - 1, -1));
+            if (y > 0) s.Push(new StackEntry(x, x, y - 1, -1));
 
             while (s.Count > 0)
             {
@@ -181,8 +236,7 @@ namespace Angelo.Bot
                     x--;
                     while (x >= 0 && IsInRangeAndUnconfirmed(x, y))
                     {
-                        _confirmedPixels[x, y] = true;
-                        debugMap?.SetPixel(x, y, Color.White);
+                        ConfirmPixel(x, y);
                         xMin = Math.Min(x, xMin);
                         xMax = Math.Max(x, xMax);
                         yMin = Math.Min(y, yMin);
@@ -204,8 +258,7 @@ namespace Angelo.Bot
                 {
                     while (x1 < _width && IsInRangeAndUnconfirmed(x1, y))
                     {
-                        _confirmedPixels[x1, y] = true;
-                        debugMap?.SetPixel(x1, y, Color.White);
+                        ConfirmPixel(x1, y);
                         xMin = Math.Min(x1, xMin);
                         xMax = Math.Max(x1, xMax);
                         yMin = Math.Min(y, yMin);

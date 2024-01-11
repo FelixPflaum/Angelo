@@ -34,7 +34,7 @@
             <Label Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=BobberToleranceSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
 
             <Label Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftLabel}">Sensitivity</Label>
-            <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Minimum="50" Maximum="500" TickFrequency="1" IsSnapToTickEnabled="True" Name="BobberPixelsSlider" ValueChanged="BobberPixelsSlider_ValueChanged"></Slider>
+            <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Minimum="25" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True" Name="BobberPixelsSlider" ValueChanged="BobberPixelsSlider_ValueChanged"></Slider>
             <Label Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Content="{Binding ElementName=BobberPixelsSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"></Label>
         </Grid>
         
